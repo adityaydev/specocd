@@ -8,7 +8,7 @@ created_at: 2026-09-22T22:37:37.099Z
 archived_at: 2026-09-22T22:37:57.595Z
 ---
 
-<!-- feature: which baseline spec in .specdd/specs/ this folds into on archive. -->
+<!-- feature: which baseline spec in .specocd/specs/ this folds into on archive. -->
 <!-- Point several changes at the same feature to grow one baseline spec. -->
 
 # phase-4-polish

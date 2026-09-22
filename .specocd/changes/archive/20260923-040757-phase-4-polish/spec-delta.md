@@ -2,7 +2,7 @@
 
 ## R1: Machine-readable output for CI
 
-- **WHEN** `specdd status` or `specdd verify` is run with `--json`
+- **WHEN** `specocd status` or `specocd verify` is run with `--json`
 - **THEN** the system shall print the report as JSON and, for `verify`, exit non-zero when blockers exist
 
 ## R2: Publishable package
