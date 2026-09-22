@@ -1,10 +1,10 @@
 ---
-description: Claim and implement a task from a Spec-OCD change
+description: Claim and implement a task from a SpecOCD change
 ---
 
 Work on: $ARGUMENTS
 
-## Spec-OCD workflow
+## SpecOCD workflow
 
 Specs live in `.specdd/`. A change is the atomic unit of work; each holds a proposal,
 requirement deltas (WHEN/THEN), tasks, a claim registry and an append-only event log.

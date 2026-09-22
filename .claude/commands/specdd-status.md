@@ -1,12 +1,12 @@
 ---
-description: Show Spec-OCD claims, stale claims and flagged conflicts
+description: Show SpecOCD claims, stale claims and flagged conflicts
 ---
 
 Run `specdd status $ARGUMENTS` and summarize: which tasks are actively claimed
 and by whom, which claims have gone stale (owner likely died — safe to take over), and
 anything flagged as conflicting.
 
-## Spec-OCD workflow
+## SpecOCD workflow
 
 Specs live in `.specdd/`. A change is the atomic unit of work; each holds a proposal,
 requirement deltas (WHEN/THEN), tasks, a claim registry and an append-only event log.

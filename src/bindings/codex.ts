@@ -23,7 +23,7 @@ export const codexBinding: BindingGenerator = {
       {
         path: "AGENTS.md",
         mode: "managed-block",
-        contents: `## Spec-OCD
+        contents: `## SpecOCD
 
 ${SHORT_SUMMARY}
 

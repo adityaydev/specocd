@@ -1,5 +1,5 @@
 ---
-description: Verify a Spec-OCD change against its WHEN/THEN acceptance criteria
+description: Verify a SpecOCD change against its WHEN/THEN acceptance criteria
 ---
 
 Verify: $ARGUMENTS
@@ -7,7 +7,7 @@ Verify: $ARGUMENTS
 Run `specdd verify <change>`, then check each WHEN/THEN requirement against the actual
 implementation. Report per-requirement pass/fail with evidence (file:line, test output).
 
-## Spec-OCD workflow
+## SpecOCD workflow
 
 Specs live in `.specdd/`. A change is the atomic unit of work; each holds a proposal,
 requirement deltas (WHEN/THEN), tasks, a claim registry and an append-only event log.

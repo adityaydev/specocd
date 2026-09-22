@@ -22,7 +22,7 @@ export function credentialsPath(root: string): string {
   return path.join(specddPath(root), CREDENTIALS_FILE);
 }
 
-export const CREDENTIALS_TEMPLATE = `# Spec-OCD credentials — NEVER commit this file.
+export const CREDENTIALS_TEMPLATE = `# SpecOCD credentials — NEVER commit this file.
 # It is added to .gitignore automatically by \`specdd jira setup\`.
 #
 # Create a JIRA API token at:
@@ -70,7 +70,7 @@ export function ensureGitignored(root: string): boolean {
   const existing = existsSync(file) ? readFileSync(file, "utf8") : "";
   if (existing.split("\n").some((line) => line.trim() === CREDENTIALS_IGNORE_ENTRY)) return false;
   const prefix = existing === "" || existing.endsWith("\n") ? "" : "\n";
-  writeFileSync(file, `${existing}${prefix}\n# Spec-OCD credentials — never commit\n${CREDENTIALS_IGNORE_ENTRY}\n`, "utf8");
+  writeFileSync(file, `${existing}${prefix}\n# SpecOCD credentials — never commit\n${CREDENTIALS_IGNORE_ENTRY}\n`, "utf8");
   return true;
 }
 

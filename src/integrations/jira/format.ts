@@ -140,7 +140,7 @@ export function handoffComment(
     lines.push("", `Please move this ticket to ${opts.qcStage}.`);
   }
 
-  lines.push("", "_Posted by Spec-OCD after automated verification. A human should still review the change._");
+  lines.push("", "_Posted by SpecOCD after automated verification. A human should still review the change._");
   return lines.join("\n");
 }
 
@@ -163,7 +163,7 @@ export function fallbackDocument(
 
   return `# JIRA handoff for ${ticket.key} — manual step needed
 
-Spec-OCD could not complete the JIRA update:
+SpecOCD could not complete the JIRA update:
 
 ${failures.map((f) => `- ${f}`).join("\n")}
 ${alreadyDone.length > 0 ? `\nAlready done, do not repeat:\n\n${alreadyDone.join("\n")}\n` : ""}

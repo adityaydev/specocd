@@ -25,7 +25,7 @@ export const claudeCodeBinding: BindingGenerator = {
     return [
       command(
         "propose",
-        "Create a new Spec-OCD change (proposal + requirement deltas + tasks)",
+        "Create a new SpecOCD change (proposal + requirement deltas + tasks)",
         `Create a new change for: $ARGUMENTS
 
 Run \`specdd propose <slug>\` to scaffold the change folder, then fill in:
@@ -37,7 +37,7 @@ ${WORKFLOW}`,
       ),
       command(
         "work",
-        "Claim and implement a task from a Spec-OCD change",
+        "Claim and implement a task from a SpecOCD change",
         `Work on: $ARGUMENTS
 
 ${WORKFLOW}
@@ -47,7 +47,7 @@ as a decision rather than silently expanding the work.`,
       ),
       command(
         "status",
-        "Show Spec-OCD claims, stale claims and flagged conflicts",
+        "Show SpecOCD claims, stale claims and flagged conflicts",
         `Run \`specdd status $ARGUMENTS\` and summarize: which tasks are actively claimed
 and by whom, which claims have gone stale (owner likely died — safe to take over), and
 anything flagged as conflicting.
@@ -56,7 +56,7 @@ ${WORKFLOW}`,
       ),
       command(
         "verify",
-        "Verify a Spec-OCD change against its WHEN/THEN acceptance criteria",
+        "Verify a SpecOCD change against its WHEN/THEN acceptance criteria",
         `Verify: $ARGUMENTS
 
 Run \`specdd verify <change>\`, then check each WHEN/THEN requirement against the actual

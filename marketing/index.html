@@ -1,0 +1,406 @@
+<title>SpecOCD</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap"
+/>
+<link rel="stylesheet" href="styles.css" />
+
+<header class="nav">
+  <div class="wrap nav-inner">
+    <a class="brand" href="#top">
+      <svg class="mark" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <rect x="2.5" y="2.5" width="19" height="19" rx="5.5" stroke="currentColor" stroke-width="1.6" />
+        <path d="M7.5 12.4l3 3 6-6.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+      SpecOCD
+    </a>
+    <nav class="nav-links">
+      <a href="#problem">Problem</a>
+      <a href="#how">How it works</a>
+      <a href="#compare">Compare</a>
+      <a href="#jira">JIRA</a>
+      <a class="nav-cta" href="#start">Get started</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero">
+    <div class="wrap">
+      <p class="eyebrow rise">Specification-Obsessed Development</p>
+      <h1 class="rise rise-2">Specs that hold up when agents work in parallel.</h1>
+      <p class="hero-sub rise rise-3">
+        Every spec framework keeps markdown in git. That works for one agent at a time. SpecOCD
+        adds the part they are all missing: task claims, conflict detection, and a decision log that
+        the next agent actually reads before it starts.
+      </p>
+      <div class="hero-actions rise rise-4">
+        <a class="btn btn-primary" href="#start">Get started</a>
+        <a class="btn btn-quiet" href="#compare">See the comparison</a>
+      </div>
+      <p class="hero-note rise rise-4">
+        A Node CLI for any language, in new or existing repos. Works with Claude Code, Cursor,
+        Copilot and Codex.
+      </p>
+
+      <div class="terminal rise rise-4">
+        <div class="terminal-bar">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          <span class="terminal-title">cursor: two agents, one task</span>
+        </div>
+        <div class="terminal-body">
+<pre><span class="c-prompt">$</span> specdd claim add-user-auth T1
+<span class="c-red">CONFLICT: Task T1 is already claimed by claude-code</span>
+<span class="c-red">(session claude-code:dev@studio, last heartbeat 10:24:02Z).</span>
+<span class="c-dim">Wait for it to be released, or let the claim go stale.</span>
+<span class="c-dim">exit 2</span>
+
+<span class="c-prompt">$</span> specdd claim add-user-auth T2
+Claimed T2 in "add-user-auth" as cursor (cursor:dev@studio).
+
+<span class="c-blue">Prior decisions on T2 (read before you start):</span>
+  <span class="c-dim">[10:19:41Z]</span> claude-code: Sliding window over fixed
+  bucket: avoids burst at the boundary.<span class="cursor">▌</span></pre>
+        </div>
+      </div>
+      <p class="caption">
+        Real output. The second agent is stopped before it writes a line of code, then handed the
+        reasoning behind the work it is picking up.
+      </p>
+    </div>
+  </section>
+
+  <section class="band" id="problem">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">The gap</p>
+        <h2>Markdown in git is not coordination.</h2>
+        <p class="lead">
+          OpenSpec, spec-kit, Kiro and BMAD all sync through versioned files. Nothing arbitrates
+          when two agents, or two sessions of one agent, reach for the same work.
+        </p>
+      </div>
+    </div>
+    <div class="modes">
+      <div class="mode">
+        <h3>Two agents, one task</h3>
+        <p>
+          Both start the same ticket. Neither knows. The one that finishes second overwrites the
+          first, and the loss is silent.
+        </p>
+      </div>
+      <div class="mode">
+        <h3>The reasoning evaporates</h3>
+        <p>
+          Session one chose JWT over cookies for a reason. Session two never hears it, picks
+          differently, and the codebase ends up arguing with itself.
+        </p>
+      </div>
+      <div class="mode">
+        <h3>A dead session holds the lock</h3>
+        <p>
+          An agent crashes mid-task. Without a heartbeat there is nothing to expire, so the work
+          stays claimed by a session that no longer exists.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section id="how">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">How it works</p>
+        <h2>Three commands carry the context.</h2>
+        <p class="lead">
+          Everything is plain text in your repo. No IDE, no service, no API key. The CLI never calls
+          a model itself.
+        </p>
+      </div>
+
+      <div class="steps">
+        <div class="step">
+          <code>specdd claim</code>
+          <h3>Claim before you touch code</h3>
+          <p>
+            Claims live in <code style="background: none; padding: 0">claims.yaml</code> beside the
+            tasks. A live claim held by another session is a hard conflict with exit code 2, not a
+            warning an agent can talk itself past.
+          </p>
+        </div>
+        <div class="step">
+          <code>specdd log</code>
+          <h3>Record the why, not the what</h3>
+          <p>
+            Decisions and blockers append to a per-change log tagged by task. The diff already shows
+            what changed; this is the part git cannot reconstruct.
+          </p>
+        </div>
+        <div class="step">
+          <code>specdd release</code>
+          <h3>Hand off cleanly</h3>
+          <p>
+            Completed, released and abandoned are distinct states. Claims carry a heartbeat, so a
+            session that dies goes stale and the task can be reclaimed instead of stranded.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Verification</p>
+        <h2>The CLI checks structure. The agent checks the code.</h2>
+        <p class="lead">
+          A tool can confirm every requirement is written and every task is closed. It cannot
+          confirm the code actually does what the spec says, so SpecOCD refuses to pretend it can.
+        </p>
+      </div>
+
+      <div class="terminal">
+        <div class="terminal-bar">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          <span class="terminal-title">specdd verify rate-limiting</span>
+        </div>
+        <div class="terminal-body">
+<pre><span class="c-prompt">$</span> specdd verify rate-limiting
+rate-limiting
+  requirements: 2
+  tasks:        2/2 done
+  claims:       0 active, 0 stale
+
+<span class="c-blue">Structural checks passed. Semantic verification is yours:</span>
+
+  R1: WHEN an IP exceeds 100 requests in 60s
+      THEN the system shall respond 429 with Retry-After
+  R2: WHEN the service restarts mid-window
+      THEN the system shall restore counters from Redis
+
+<span class="c-dim">Check each against the ACTUAL implementation. Read the code,</span>
+<span class="c-dim">run the tests. Never mark a requirement verified from the</span>
+<span class="c-dim">spec or task list alone.</span></pre>
+        </div>
+      </div>
+      <p class="caption">
+        Requirements are written WHEN/THEN, so acceptance criteria are unambiguous to a person and a
+        model alike. On archive they fold into a per-feature baseline spec.
+      </p>
+    </div>
+  </section>
+
+  <section id="compare">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Compare</p>
+        <h2>What the others leave to convention.</h2>
+        <p class="lead">
+          Each of these is good at something. None of them arbitrates concurrent work, which is the
+          only reason SpecOCD exists.
+        </p>
+      </div>
+
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">Capability</th>
+              <th scope="col" class="ours">SpecOCD</th>
+              <th scope="col">OpenSpec</th>
+              <th scope="col">spec-kit</th>
+              <th scope="col">Kiro</th>
+              <th scope="col">BMAD</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">Task claims with conflict detection</th>
+              <td class="ours"><span class="yes">Built in</span></td>
+              <td><span class="partial">Worktree isolation (beta)</span></td>
+              <td><span class="no">None</span></td>
+              <td><span class="no">None</span></td>
+              <td><span class="no">Sequential relay</span></td>
+            </tr>
+            <tr>
+              <th scope="row">Stale-session recovery</th>
+              <td class="ours"><span class="yes">Heartbeat and takeover</span></td>
+              <td><span class="no">None</span></td>
+              <td><span class="no">None</span></td>
+              <td><span class="no">None</span></td>
+              <td><span class="no">None</span></td>
+            </tr>
+            <tr>
+              <th scope="row">Prior decisions replayed on pickup</th>
+              <td class="ours"><span class="yes">Automatic</span></td>
+              <td><span class="no">None</span></td>
+              <td><span class="no">None</span></td>
+              <td><span class="no">None</span></td>
+              <td><span class="partial">Document handoff</span></td>
+            </tr>
+            <tr>
+              <th scope="row">Context budget cap</th>
+              <td class="ours"><span class="yes">50 KB plus digest</span></td>
+              <td><span class="yes">50 KB per spec</span></td>
+              <td><span class="no">Not addressed</span></td>
+              <td><span class="partial">Steering scope</span></td>
+              <td><span class="partial">Persona scope</span></td>
+            </tr>
+            <tr>
+              <th scope="row">Drops into an existing repo</th>
+              <td class="ours"><span class="yes">Yes</span></td>
+              <td><span class="yes">Yes</span></td>
+              <td><span class="partial">Greenfield-leaning</span></td>
+              <td><span class="partial">Partial</span></td>
+              <td><span class="partial">Partial</span></td>
+            </tr>
+            <tr>
+              <th scope="row">Works with any AI tool</th>
+              <td class="ours"><span class="yes">4 agents</span></td>
+              <td><span class="yes">20+ agents</span></td>
+              <td><span class="yes">30+ agents</span></td>
+              <td><span class="no">Its own IDE</span></td>
+              <td><span class="yes">Tool-agnostic</span></td>
+            </tr>
+            <tr>
+              <th scope="row">JIRA ticket to QC loop</th>
+              <td class="ours"><span class="yes">Built in</span></td>
+              <td><span class="no">None</span></td>
+              <td><span class="partial">Via extension</span></td>
+              <td><span class="no">None</span></td>
+              <td><span class="no">None</span></td>
+            </tr>
+            <tr>
+              <th scope="row">Ceremony</th>
+              <td class="ours"><span class="yes">Proportional</span></td>
+              <td>Low</td>
+              <td>High</td>
+              <td>Medium</td>
+              <td>High</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="footnote">
+        Based on public documentation and community reports, September 2026. OpenSpec is the closest
+        prior art. Its git-worktree isolation and cross-repo Stores are documented as beta.
+        spec-kit's constitution step is genuinely stronger governance than anything here; it is also
+        the framework most often reported as heavy for small changes.
+      </p>
+    </div>
+  </section>
+
+  <section class="band" id="jira">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">JIRA</p>
+        <h2>From ticket to QC, without leaving the terminal.</h2>
+        <p class="lead">
+          Add an API token to one gitignored file. The agent reads the ticket, including title,
+          description, comments, due date and attachments, then scaffolds a change from it and
+          reports back once the work is verified.
+        </p>
+      </div>
+
+      <div class="split">
+        <div class="flow">
+          <div class="flow-step">
+            specdd jira start PROJ-123
+            <span>Ticket becomes a change</span>
+          </div>
+          <div class="flow-step">
+            specdd claim / log
+            <span>Agent plans and implements</span>
+          </div>
+          <div class="flow-step">
+            specdd verify
+            <span>Criteria checked against code</span>
+          </div>
+          <div class="flow-step">
+            specdd jira handoff
+            <span>Comments, moves to QC</span>
+          </div>
+          <div class="flow-step fallback">
+            jira-handoff.md
+            <span>If a write fails, paste-ready</span>
+          </div>
+        </div>
+
+        <div>
+          <h3 style="margin-bottom: 12px">It degrades instead of failing</h3>
+          <p class="lead" style="font-size: 1rem">
+            Permissions and workflow rules differ per project, and finished work should never be
+            stranded by either. Reading a ticket is the only hard requirement. If the comment or the
+            transition fails, SpecOCD writes a paste-ready file, prints the comment, and exits 3.
+            It lists what already succeeded, so you never double-post or re-move a ticket.
+          </p>
+          <p class="caption" style="margin-top: 22px">
+            Ticket text reaches the agent fenced as data, not instructions. Descriptions are written
+            by other people, and a ticket that tells an agent to ignore its instructions gets
+            surfaced to you rather than obeyed.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="start">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Get started</p>
+        <h2>Five minutes, no restructuring.</h2>
+        <p class="lead">
+          Run it in a repo you already have. Init writes a <code>.specdd/</code> directory, detects
+          your agent tooling, and generates the matching slash commands. It touches nothing else.
+        </p>
+      </div>
+
+      <div class="install">
+        <code id="install-cmd">npm install -g spec-ocd &amp;&amp; specdd init</code>
+        <button class="copy" type="button" data-copy="#install-cmd">Copy</button>
+      </div>
+
+      <div class="cmd-list">
+        <div class="cmd"><code>specdd propose "rate limiting"</code><span>Scaffold a change</span></div>
+        <div class="cmd"><code>specdd status</code><span>Claims, stale claims, cap breaches</span></div>
+        <div class="cmd"><code>specdd claim &lt;change&gt; T1</code><span>Take a task, see prior decisions</span></div>
+        <div class="cmd"><code>specdd log &lt;change&gt; --task T1</code><span>Record a decision or blocker</span></div>
+        <div class="cmd"><code>specdd verify &lt;change&gt;</code><span>Check before archiving</span></div>
+        <div class="cmd"><code>specdd archive &lt;change&gt;</code><span>Fold into the baseline spec</span></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap foot-grid">
+    <p class="status">
+      <strong>Status:</strong> v0.1 with 80 passing tests, self-hosted (this framework manages its
+      own development). Not yet published to npm. The JIRA integration is verified against a mock
+      API, so first contact with a live instance may need fixes.
+    </p>
+    <p>MIT licensed</p>
+  </div>
+</footer>
+
+<script>
+  document.querySelectorAll(".copy").forEach(function (button) {
+    button.addEventListener("click", function () {
+      var target = document.querySelector(button.dataset.copy);
+      if (!target) return;
+      navigator.clipboard
+        .writeText(target.textContent.trim())
+        .then(function () {
+          var previous = button.textContent;
+          button.textContent = "Copied";
+          setTimeout(function () {
+            button.textContent = previous;
+          }, 1600);
+        })
+        .catch(function () {
+          button.textContent = "Press Cmd C";
+        });
+    });
+  });
+</script>

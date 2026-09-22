@@ -1,4 +1,4 @@
-# Spec-OCD: Application Requirements Plan
+# SpecOCD: Application Requirements Plan
 
 Status: v1.0 (finalized for development)
 Date: 2026-09-23
@@ -12,7 +12,7 @@ Design a lightweight, tool-agnostic Spec-Driven Development (SDD) framework that
 - Works with any AI coding agent (Claude Code, Cursor, Copilot, Codex, etc.) without hard vendor lock-in.
 - Keeps multiple AI agents/sessions working on related tasks in sync — this is the gap every existing framework leaves open.
 
-This document analyzes four existing SDD frameworks, extracts what to keep/avoid, and defines the requirements for the new framework ("Spec-OCD").
+This document analyzes four existing SDD frameworks, extracts what to keep/avoid, and defines the requirements for the new framework ("SpecOCD").
 
 ## 2. Competitive Analysis
 
@@ -61,7 +61,7 @@ This document analyzes four existing SDD frameworks, extracts what to keep/avoid
 
 **The single clearest gap across all four**: none has a production-grade mechanism for multiple agents (or multiple sessions of the same agent) to work on the same or related tasks *concurrently* without stepping on each other or silently diverging. Every framework's "sync" is really just "shared markdown files in git" — which works for sequential/single-agent use but breaks down for concurrency (race conditions on task claims, no conflict signaling, no shared short-term memory of *why* a decision was made).
 
-## 3. Design Principles for Spec-OCD
+## 3. Design Principles for SpecOCD
 
 Derived directly from the above:
 

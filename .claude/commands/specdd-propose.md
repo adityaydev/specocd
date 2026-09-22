@@ -1,5 +1,5 @@
 ---
-description: Create a new Spec-OCD change (proposal + requirement deltas + tasks)
+description: Create a new SpecOCD change (proposal + requirement deltas + tasks)
 ---
 
 Create a new change for: $ARGUMENTS
@@ -9,7 +9,7 @@ Run `specdd propose <slug>` to scaffold the change folder, then fill in:
 - `spec-delta.md` — acceptance criteria as WHEN/THEN requirements with ids (R1, R2...)
 - `tasks.md` — implementation tasks with stable ids (T1, T2...)
 
-## Spec-OCD workflow
+## SpecOCD workflow
 
 Specs live in `.specdd/`. A change is the atomic unit of work; each holds a proposal,
 requirement deltas (WHEN/THEN), tasks, a claim registry and an append-only event log.

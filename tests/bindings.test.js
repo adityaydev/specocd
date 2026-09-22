@@ -89,7 +89,7 @@ describe("writeBindings", () => {
     writeBindings(root, ["codex"]);
     const agents = readFileSync(path.join(root, "AGENTS.md"), "utf8");
     assert.match(agents, /no force pushes/);
-    assert.match(agents, /Spec-OCD/);
+    assert.match(agents, /SpecOCD/);
   });
 
   test("replace-mode files are fully owned", () => {

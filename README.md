@@ -1,4 +1,6 @@
-# Spec-OCD
+# SpecOCD
+
+**Specification-Obsessed Development.**
 
 A lightweight, tool-agnostic spec-driven development framework — with the piece every
 other SDD framework leaves out: **coordination between multiple AI agents working the
@@ -7,7 +9,7 @@ same change**.
 OpenSpec, spec-kit, Kiro and BMAD all treat "shared markdown files in git" as their sync
 mechanism. That works for one agent at a time. It breaks the moment two agents (or two
 sessions) touch related tasks: no claim, no conflict signal, no shared memory of *why* a
-decision was made. Spec-OCD fixes exactly that, and stays out of your way otherwise.
+decision was made. SpecOCD fixes exactly that, and stays out of your way otherwise.
 
 See [REQUIREMENTS.md](REQUIREMENTS.md) for the full analysis and design rationale.
 
@@ -145,7 +147,7 @@ specdd jira handoff --change proj-123-… # comment on the ticket and move it to
 
 Reading a ticket is the only hard requirement. If posting the comment or moving the ticket
 fails — permissions, a workflow rule, a transition that isn't available from the current
-status — the work is never stranded: Spec-OCD writes `jira-handoff.md` into the change
+status — the work is never stranded: SpecOCD writes `jira-handoff.md` into the change
 folder with a paste-ready comment and exactly which steps remain, prints the comment to the
 terminal, and exits `3`. Whatever already succeeded is listed as "already done, do not
 repeat", so you never double-post or re-move a ticket.
@@ -180,7 +182,7 @@ Server/Data Center work; set `jira.api_version: 3` in `config.yaml` for Cloud's 
 
 ## Self-hosted
 
-Spec-OCD manages its own development: this repo has a `.specdd/` directory, and the
+SpecOCD manages its own development: this repo has a `.specdd/` directory, and the
 Phase 4 work was proposed, verified and archived through the tool itself. `specdd init`
 ran on an existing repository without modifying a single existing file — the brownfield
 adoption requirement, demonstrated rather than asserted.
