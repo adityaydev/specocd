@@ -8,6 +8,7 @@ import { digestInstruction, findOversized, writeDigest } from "./core/digest.js"
 import { appendEvent, readEvents, type EventType } from "./core/events.js";
 import { resolveIdentity } from "./core/session.js";
 import { archive } from "./commands/archive.js";
+import { listBindings, syncBindings } from "./commands/bindings.js";
 import { init } from "./commands/init.js";
 import { propose } from "./commands/propose.js";
 import { status } from "./commands/status.js";
@@ -230,6 +231,37 @@ program
       `Archived "${result.change}" (${result.foldedRequirements} requirements folded into ` +
         `${path.relative(root, result.specFile)})\n  → ${path.relative(root, result.archivedTo)}/`,
     );
+  });
+
+const bindings = program.command("bindings").description("Manage generated per-agent bindings");
+
+bindings
+  .command("list")
+  .description("Show available, detected and enabled bindings")
+  .action(() => {
+    const listing = listBindings(requireRoot());
+    console.log(`available: ${listing.available.join(", ")}`);
+    console.log(`detected:  ${listing.detected.join(", ") || "none"}`);
+    console.log(`enabled:   ${listing.enabled.join(", ") || "none"}`);
+  });
+
+bindings
+  .command("sync")
+  .option("--all", "write bindings for every supported agent")
+  .option("--only <names>", "comma-separated list of bindings to write")
+  .description("Regenerate binding files after a framework update")
+  .action((opts: { all?: boolean; only?: string }) => {
+    const root = requireRoot();
+    const result = syncBindings(root, {
+      all: opts.all,
+      only: opts.only?.split(",").map((s) => s.trim()).filter(Boolean),
+    });
+    if (result.bindings.length === 0) {
+      console.log("No agent tooling detected. Use `specdd bindings sync --all` to write them anyway.");
+      return;
+    }
+    console.log(`Synced: ${result.bindings.join(", ")}`);
+    console.log(`  ${result.files.join("\n  ")}`);
   });
 
 program

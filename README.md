@@ -79,6 +79,24 @@ itself — no API keys, no external service.
 | `specdd verify <change>` | Structural checks, then hands semantic verification to the agent |
 | `specdd archive <change> [--force]` | Fold into the baseline spec and freeze the change |
 | `specdd digest <change>` | Regenerate the structural digest |
+| `specdd bindings list` | Show available, detected and enabled agent bindings |
+| `specdd bindings sync [--all] [--only a,b]` | Regenerate binding files |
+
+## Agent bindings
+
+`specdd init` detects your tooling and writes bindings so the same workflow is enforced
+whichever agent is driving:
+
+| Agent | Writes |
+|---|---|
+| Claude Code | `.claude/commands/specdd-*.md` (slash commands) |
+| Cursor | `.cursor/rules/specdd.mdc` |
+| GitHub Copilot | `.github/copilot-instructions.md` + `.github/prompts/*.prompt.md` |
+| Codex | `AGENTS.md` |
+
+Files you may already own — `AGENTS.md` and `copilot-instructions.md` — are spliced as a
+delimited managed block, so your own content is never overwritten and re-syncing never
+duplicates it. Tool-specific files are fully owned and regenerated in place.
 
 ## Verify and archive
 
@@ -100,9 +118,9 @@ human sets `approved: true` in the change's `proposal.md`.
 
 ## Status
 
-Phases 1 and 2 are implemented and tested (30 tests): core coordination, Claude Code
-bindings, verify/archive/digest and the approval gate. Phase 3 (Cursor/Copilot/Codex
-bindings) and Phase 4 (polish, npm publish) are next — see REQUIREMENTS.md §8.4.
+Phases 1–3 are implemented and tested (46 tests): core coordination, the full
+propose → claim → verify → archive lifecycle, and bindings for all four launch agents.
+Phase 4 (polish, npm publish) is next — see REQUIREMENTS.md §8.4.
 
 ## Never put secrets in `.specdd/`
 
