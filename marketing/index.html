@@ -43,13 +43,16 @@
   </symbol>
 </svg>
 
-<header class="nav">
+<header class="nav" id="nav">
   <div class="wrap nav-inner">
-    <a class="brand" href="#top">
-      <svg class="mark" aria-hidden="true" focusable="false"><use href="#specocd-mark" /></svg>
-      SpecOCD
-    </a>
-    <nav class="nav-links">
+    <div class="nav-brand">
+      <a class="brand" href="#top">
+        <svg class="mark" aria-hidden="true" focusable="false"><use href="#specocd-mark" /></svg>
+        SpecOCD
+      </a>
+      <span class="version">v0.1.0</span>
+    </div>
+    <nav class="nav-links" aria-label="Sections">
       <a href="#problem">Problem</a>
       <a href="#how">How it works</a>
       <a href="#compare">Compare</a>
@@ -445,6 +448,56 @@ rate-limiting
 </footer>
 
 <script>
+  // Lift the nav once the page has scrolled beneath it.
+  (function () {
+    var nav = document.getElementById("nav");
+    if (!nav) return;
+    var update = function () {
+      nav.classList.toggle("is-scrolled", window.scrollY > 8);
+    };
+    update();
+    window.addEventListener("scroll", update, { passive: true });
+  })();
+
+  // Mark the section currently in view, so the nav says where you are.
+  (function () {
+    var links = Array.prototype.slice.call(
+      document.querySelectorAll(".nav-links a:not(.nav-cta)"),
+    );
+    var sections = links
+      .map(function (link) {
+        return document.querySelector(link.getAttribute("href"));
+      })
+      .filter(Boolean);
+    if (sections.length === 0 || !("IntersectionObserver" in window)) return;
+
+    var visible = new Map();
+    var observer = new IntersectionObserver(
+      function (entries) {
+        entries.forEach(function (entry) {
+          visible.set(entry.target, entry.isIntersecting ? entry.intersectionRatio : 0);
+        });
+        var best = null;
+        var bestRatio = 0;
+        visible.forEach(function (ratio, section) {
+          if (ratio > bestRatio) {
+            bestRatio = ratio;
+            best = section;
+          }
+        });
+        links.forEach(function (link) {
+          var isCurrent = best !== null && link.getAttribute("href") === "#" + best.id;
+          if (isCurrent) link.setAttribute("aria-current", "true");
+          else link.removeAttribute("aria-current");
+        });
+      },
+      { threshold: [0, 0.25, 0.5, 0.75], rootMargin: "-58px 0px -45% 0px" },
+    );
+    sections.forEach(function (section) {
+      observer.observe(section);
+    });
+  })();
+
   document.querySelectorAll(".copy").forEach(function (button) {
     button.addEventListener("click", function () {
       var target = document.querySelector(button.dataset.copy);

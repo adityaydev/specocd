@@ -182,7 +182,24 @@ h3 {
   background: color-mix(in srgb, var(--ground) 82%, transparent);
   backdrop-filter: saturate(180%) blur(20px);
   -webkit-backdrop-filter: saturate(180%) blur(20px);
-  border-bottom: 1px solid var(--hairline-soft);
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Lifts off the page only once content runs underneath it. */
+.nav.is-scrolled {
+  border-bottom-color: var(--hairline-soft);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.05);
+}
+
+:root[data-theme="dark"] .nav.is-scrolled {
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .nav.is-scrolled {
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
+  }
 }
 
 .nav-inner {
@@ -190,7 +207,24 @@ h3 {
   align-items: center;
   justify-content: space-between;
   gap: 20px;
-  height: 52px;
+  height: 58px;
+}
+
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.version {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  line-height: 1;
+  color: var(--muted);
+  border: 1px solid var(--hairline);
+  border-radius: 980px;
+  padding: 4px 8px 3px;
+  font-variant-numeric: tabular-nums;
 }
 
 .brand {
@@ -218,18 +252,76 @@ h3 {
 .nav-links {
   display: flex;
   align-items: center;
-  gap: 26px;
+  gap: 4px;
   font-size: 0.8125rem;
   color: var(--ink-soft);
 }
 
 .nav-links a {
+  position: relative;
   color: inherit;
+  padding: 7px 10px;
+  border-radius: 8px;
+  transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+/* Underline grows from the centre on hover and stays put for the current section. */
+.nav-links a::after {
+  content: "";
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 2px;
+  height: 1.5px;
+  border-radius: 2px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transition: transform 0.25s cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 
 .nav-links a:hover {
-  color: var(--accent);
+  color: var(--ink);
   text-decoration: none;
+}
+
+.nav-links a:hover::after,
+.nav-links a[aria-current="true"]::after {
+  transform: scaleX(1);
+}
+
+.nav-links a[aria-current="true"] {
+  color: var(--ink);
+}
+
+.nav-cta {
+  margin-left: 12px;
+  height: 34px;
+  padding: 0 16px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 980px;
+  font-weight: 500;
+}
+
+/* Beats the shared .nav-links a rules above, which would otherwise repaint it. */
+.nav-links a.nav-cta,
+.nav-links a.nav-cta:hover {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.nav-links a.nav-cta:hover {
+  background: color-mix(in srgb, var(--accent) 86%, #000);
+}
+
+.nav-links a.nav-cta::after {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-links a::after {
+    transition: none;
+  }
 }
 
 /* ---------- hero ---------- */
@@ -780,8 +872,18 @@ footer {
   }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 760px) {
   .nav-links a:not(.nav-cta) {
+    display: none;
+  }
+
+  .nav-cta {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 600px) {
+  .version {
     display: none;
   }
 
