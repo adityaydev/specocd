@@ -76,12 +76,33 @@ itself — no API keys, no external service.
 | `specdd release <change> <task-id> [--status ...]` | End a claim: completed / released / abandoned |
 | `specdd log <change> [--task <id>] --type <t> --message <m>` | Append an event; `--show` reads the log |
 | `specdd status [change]` | Active claims, stale claims, cap breaches |
+| `specdd verify <change>` | Structural checks, then hands semantic verification to the agent |
+| `specdd archive <change> [--force]` | Fold into the baseline spec and freeze the change |
+| `specdd digest <change>` | Regenerate the structural digest |
+
+## Verify and archive
+
+`specdd verify` does the checks a CLI can actually do — requirements defined and free of
+template placeholders, tasks marked done, no live claims, approval granted if required —
+then prints each WHEN/THEN and hands semantic verification to the agent, which must check
+the real code rather than trusting the spec. It exits non-zero when blocked, so it works in CI.
+
+`specdd archive` refuses to run while those blockers stand (override with `--force`). On
+success it folds the change's requirements into `.specdd/specs/<feature>.md` and moves the
+change to `changes/archive/<timestamp>-<slug>/`. Point several changes at the same
+`feature:` in their front-matter to grow one baseline spec.
+
+## Optional approval gate
+
+Off by default — normal PR review is your gate. Teams that want a hard block set
+`require_approval: true` in `.specdd/config.yaml`, which makes `archive` refuse until a
+human sets `approved: true` in the change's `proposal.md`.
 
 ## Status
 
-Phase 1 (core coordination + Claude Code bindings) is implemented and tested.
-Phase 2 (`verify`, `archive`, approval gate), Phase 3 (Cursor/Copilot/Codex bindings) and
-Phase 4 (polish, npm publish) are planned — see REQUIREMENTS.md §8.4.
+Phases 1 and 2 are implemented and tested (30 tests): core coordination, Claude Code
+bindings, verify/archive/digest and the approval gate. Phase 3 (Cursor/Copilot/Codex
+bindings) and Phase 4 (polish, npm publish) are next — see REQUIREMENTS.md §8.4.
 
 ## Never put secrets in `.specdd/`
 

@@ -4,12 +4,14 @@ import path from "node:path";
 import { Command } from "commander";
 import { loadConfig } from "./config.js";
 import { ClaimConflictError, claimTask, loadClaims, releaseTask, saveClaims } from "./core/claims.js";
-import { digestInstruction, findOversized } from "./core/digest.js";
+import { digestInstruction, findOversized, writeDigest } from "./core/digest.js";
 import { appendEvent, readEvents, type EventType } from "./core/events.js";
 import { resolveIdentity } from "./core/session.js";
+import { archive } from "./commands/archive.js";
 import { init } from "./commands/init.js";
 import { propose } from "./commands/propose.js";
 import { status } from "./commands/status.js";
+import { verify, verifyInstruction } from "./commands/verify.js";
 import { changeDir, requireRoot } from "./paths.js";
 
 const program = new Command();
@@ -188,6 +190,58 @@ program
         console.log("  " + digestInstruction(s.change, s.oversized).split("\n").join("\n  "));
       }
     }
+  });
+
+program
+  .command("verify")
+  .argument("<change>")
+  .description("Check a change against its acceptance criteria before archiving")
+  .action((change: string) => {
+    const root = requireRoot();
+    requireChange(root, change);
+    const report = verify(root, change);
+
+    console.log(`${report.change}`);
+    console.log(`  requirements: ${report.requirements.length}`);
+    console.log(`  tasks:        ${report.tasks.filter((t) => t.done).length}/${report.tasks.length} done`);
+    console.log(`  claims:       ${report.activeClaims.length} active, ${report.staleClaims.length} stale`);
+    if (report.approvalRequired) console.log(`  approval:     ${report.approved ? "granted" : "PENDING"}`);
+
+    if (report.oversized.length > 0) console.warn("\n" + digestInstruction(report.change, report.oversized));
+
+    if (report.blockers.length > 0) {
+      console.error("\nNot ready to archive:");
+      for (const blocker of report.blockers) console.error(`  - ${blocker}`);
+      process.exit(1);
+    }
+    console.log("\n" + verifyInstruction(report));
+  });
+
+program
+  .command("archive")
+  .argument("<change>")
+  .option("--force", "archive despite unresolved blockers")
+  .description("Fold a completed change into the baseline spec and freeze it")
+  .action((change: string, opts: { force?: boolean }) => {
+    const root = requireRoot();
+    requireChange(root, change);
+    const result = archive(root, change, opts);
+    console.log(
+      `Archived "${result.change}" (${result.foldedRequirements} requirements folded into ` +
+        `${path.relative(root, result.specFile)})\n  → ${path.relative(root, result.archivedTo)}/`,
+    );
+  });
+
+program
+  .command("digest")
+  .argument("<change>")
+  .description("Regenerate the change's structural digest")
+  .action((change: string) => {
+    const root = requireRoot();
+    requireChange(root, change);
+    writeDigest(root, change);
+    console.log(`Regenerated ${change}/digest.md.`);
+    console.log("Condense the prose further if the change's artifacts are still over cap.");
   });
 
 try {

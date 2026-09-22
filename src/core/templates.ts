@@ -4,10 +4,14 @@ export function proposalTemplate(change: string, createdAt: string): string {
   return `---
 schema_version: ${SCHEMA_VERSION}
 change: ${change}
+feature: ${change}
 status: draft
 approved: false
 created_at: ${createdAt}
 ---
+
+<!-- feature: which baseline spec in .specdd/specs/ this folds into on archive. -->
+<!-- Point several changes at the same feature to grow one baseline spec. -->
 
 # ${change}
 
