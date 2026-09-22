@@ -23,18 +23,18 @@ npm install -g spec-ocd
 
 ```bash
 cd your-project            # new or existing, any language
-specdd init                # scaffolds .specdd/, detects your agent, writes bindings
-specdd propose "add user auth"
+specocd init                # scaffolds .specocd/, detects your agent, writes bindings
+specocd propose "add user auth"
 ```
 
 Fill in the scaffolded `proposal.md`, `spec-delta.md` (WHEN/THEN criteria) and `tasks.md`,
 then let agents work:
 
 ```bash
-specdd status                                  # who holds what, what's stale
-specdd claim add-user-auth T1                  # claim before you touch code
-specdd log add-user-auth --task T1 --type decision --message "JWT over cookies: stateless"
-specdd release add-user-auth T1 --status completed
+specocd status                                  # who holds what, what's stale
+specocd claim add-user-auth T1                  # claim before you touch code
+specocd log add-user-auth --task T1 --type decision --message "JWT over cookies: stateless"
+specocd release add-user-auth T1 --status completed
 ```
 
 ## How multi-agent coordination works
@@ -59,7 +59,7 @@ itself — no API keys, no external service.
 ## Layout
 
 ```
-.specdd/
+.specocd/
   config.yaml                  # caps, staleness window, approval gate, bindings
   specs/<feature>.md           # persistent baseline requirements
   changes/<slug>/
@@ -72,32 +72,32 @@ itself — no API keys, no external service.
 
 | Command | Purpose |
 |---|---|
-| `specdd init` | Scaffold `.specdd/`, detect agent tooling, generate bindings |
-| `specdd propose <name> [--design]` | Create a change |
-| `specdd claim <change> <task-id>` | Claim a task (conflicts on a live claim) |
-| `specdd release <change> <task-id> [--status ...]` | End a claim: completed / released / abandoned |
-| `specdd log <change> [--task <id>] --type <t> --message <m>` | Append an event; `--show` reads the log |
-| `specdd status [change]` | Active claims, stale claims, cap breaches |
-| `specdd verify <change>` | Structural checks, then hands semantic verification to the agent |
-| `specdd archive <change> [--force]` | Fold into the baseline spec and freeze the change |
-| `specdd digest <change>` | Regenerate the structural digest |
-| `specdd bindings list` | Show available, detected and enabled agent bindings |
-| `specdd bindings sync [--all] [--only a,b]` | Regenerate binding files |
-| `specdd jira setup` | Create the gitignored credentials file |
-| `specdd jira show <key>` | Fetch and print a ticket |
-| `specdd jira start <key>` | Scaffold a change from a ticket |
-| `specdd jira link <change> <key>` | Link an existing change to a ticket |
-| `specdd jira handoff --change <c>` | Comment on the ticket and move it to QC |
+| `specocd init` | Scaffold `.specocd/`, detect agent tooling, generate bindings |
+| `specocd propose <name> [--design]` | Create a change |
+| `specocd claim <change> <task-id>` | Claim a task (conflicts on a live claim) |
+| `specocd release <change> <task-id> [--status ...]` | End a claim: completed / released / abandoned |
+| `specocd log <change> [--task <id>] --type <t> --message <m>` | Append an event; `--show` reads the log |
+| `specocd status [change]` | Active claims, stale claims, cap breaches |
+| `specocd verify <change>` | Structural checks, then hands semantic verification to the agent |
+| `specocd archive <change> [--force]` | Fold into the baseline spec and freeze the change |
+| `specocd digest <change>` | Regenerate the structural digest |
+| `specocd bindings list` | Show available, detected and enabled agent bindings |
+| `specocd bindings sync [--all] [--only a,b]` | Regenerate binding files |
+| `specocd jira setup` | Create the gitignored credentials file |
+| `specocd jira show <key>` | Fetch and print a ticket |
+| `specocd jira start <key>` | Scaffold a change from a ticket |
+| `specocd jira link <change> <key>` | Link an existing change to a ticket |
+| `specocd jira handoff --change <c>` | Comment on the ticket and move it to QC |
 
 ## Agent bindings
 
-`specdd init` detects your tooling and writes bindings so the same workflow is enforced
+`specocd init` detects your tooling and writes bindings so the same workflow is enforced
 whichever agent is driving:
 
 | Agent | Writes |
 |---|---|
-| Claude Code | `.claude/commands/specdd-*.md` (slash commands) |
-| Cursor | `.cursor/rules/specdd.mdc` |
+| Claude Code | `.claude/commands/specocd-*.md` (slash commands) |
+| Cursor | `.cursor/rules/specocd.mdc` |
 | GitHub Copilot | `.github/copilot-instructions.md` + `.github/prompts/*.prompt.md` |
 | Codex | `AGENTS.md` |
 
@@ -107,20 +107,20 @@ duplicates it. Tool-specific files are fully owned and regenerated in place.
 
 ## Verify and archive
 
-`specdd verify` does the checks a CLI can actually do — requirements defined and free of
+`specocd verify` does the checks a CLI can actually do — requirements defined and free of
 template placeholders, tasks marked done, no live claims, approval granted if required —
 then prints each WHEN/THEN and hands semantic verification to the agent, which must check
 the real code rather than trusting the spec. It exits non-zero when blocked, so it works in CI.
 
-`specdd archive` refuses to run while those blockers stand (override with `--force`). On
-success it folds the change's requirements into `.specdd/specs/<feature>.md` and moves the
+`specocd archive` refuses to run while those blockers stand (override with `--force`). On
+success it folds the change's requirements into `.specocd/specs/<feature>.md` and moves the
 change to `changes/archive/<timestamp>-<slug>/`. Point several changes at the same
 `feature:` in their front-matter to grow one baseline spec.
 
 ## Optional approval gate
 
 Off by default — normal PR review is your gate. Teams that want a hard block set
-`require_approval: true` in `.specdd/config.yaml`, which makes `archive` refuse until a
+`require_approval: true` in `.specocd/config.yaml`, which makes `archive` refuse until a
 human sets `approved: true` in the change's `proposal.md`.
 
 ## JIRA integration
@@ -128,20 +128,20 @@ human sets `approved: true` in the change's `proposal.md`.
 Work straight from tickets. Set up once:
 
 ```bash
-specdd jira setup          # writes .specdd/credentials.yaml and gitignores it
+specocd jira setup          # writes .specocd/credentials.yaml and gitignores it
 ```
 
 Fill in `base_url`, `email` and an [API token](https://id.atlassian.com/manage-profile/security/api-tokens)
-(or set `SPECDD_JIRA_BASE_URL` / `SPECDD_JIRA_EMAIL` / `SPECDD_JIRA_TOKEN`). Then:
+(or set `SPECOCD_JIRA_BASE_URL` / `SPECOCD_JIRA_EMAIL` / `SPECOCD_JIRA_TOKEN`). Then:
 
 ```bash
-specdd jira show PROJ-123               # title, description, comments, due date, attachments
-specdd jira start PROJ-123              # scaffold a change from the ticket
+specocd jira show PROJ-123               # title, description, comments, due date, attachments
+specocd jira start PROJ-123              # scaffold a change from the ticket
 # ... agent writes WHEN/THEN criteria, claims tasks, implements, verifies ...
-specdd jira handoff --change proj-123-… # comment on the ticket and move it to QC
+specocd jira handoff --change proj-123-… # comment on the ticket and move it to QC
 ```
 
-`specdd jira link <change> PROJ-123` connects a change you already started.
+`specocd jira link <change> PROJ-123` connects a change you already started.
 
 ### It degrades instead of failing
 
@@ -160,14 +160,14 @@ notice, and the agent bindings tell agents to surface such attempts rather than 
 
 ### Token safety
 
-`specdd jira setup` adds the credentials file to `.gitignore`. If the file is ever found
+`specocd jira setup` adds the credentials file to `.gitignore`. If the file is ever found
 tracked by git, commands refuse to run and tell you to revoke the token — a leaked JIRA
 token is an incident, not a warning. API v2 is the default so both Jira Cloud and
 Server/Data Center work; set `jira.api_version: 3` in `config.yaml` for Cloud's ADF API.
 
 ## Use in CI
 
-`specdd status` and `specdd verify` accept `--json`. Exit codes are a stable contract:
+`specocd status` and `specocd verify` accept `--json`. Exit codes are a stable contract:
 
 | Code | Meaning |
 |---|---|
@@ -177,13 +177,13 @@ Server/Data Center work; set `jira.api_version: 3` in `config.yaml` for Cloud's 
 | `3` | JIRA handoff incomplete — a manual step is needed (see `jira-handoff.md`) |
 
 ```yaml
-- run: specdd verify "$CHANGE" --json
+- run: specocd verify "$CHANGE" --json
 ```
 
 ## Self-hosted
 
-SpecOCD manages its own development: this repo has a `.specdd/` directory, and the
-Phase 4 work was proposed, verified and archived through the tool itself. `specdd init`
+SpecOCD manages its own development: this repo has a `.specocd/` directory, and the
+Phase 4 work was proposed, verified and archived through the tool itself. `specocd init`
 ran on an existing repository without modifying a single existing file — the brownfield
 adoption requirement, demonstrated rather than asserted.
 
@@ -193,7 +193,7 @@ All four phases are implemented and tested (53 tests, incl. CLI exit-code contra
 core coordination, the full propose → claim → verify → archive lifecycle, bindings for all
 four launch agents, and CI/packaging polish. Not yet published to npm.
 
-## Never put secrets in `.specdd/`
+## Never put secrets in `.specocd/`
 
 Event logs, claims and specs are committed to git. Credentials in git history are far
 harder to purge than a chat transcript.

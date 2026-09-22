@@ -149,7 +149,7 @@ export async function handoff(
   if (change && !key) key = ticketForChange(root, change) ?? undefined;
   if (key && !change) change = findChangeForTicket(root, key) ?? undefined;
   if (!key) throw new Error("No JIRA ticket given or linked. Pass --key PROJ-123, or add `jira: PROJ-123` to the change's proposal.md.");
-  if (!change) throw new Error(`No change linked to ${key}. Pass --change <slug>, or run \`specdd jira start ${key}\` first.`);
+  if (!change) throw new Error(`No change linked to ${key}. Pass --change <slug>, or run \`specocd jira start ${key}\` first.`);
   if (!existsSync(changeDir(root, change))) throw new Error(`No such change: "${change}".`);
 
   const report = verify(root, change);

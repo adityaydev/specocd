@@ -15,7 +15,7 @@ const AGENT_ENV_MARKERS: Array<[string, string]> = [
 ];
 
 export function detectAgent(): string {
-  if (process.env.SPECDD_AGENT) return process.env.SPECDD_AGENT;
+  if (process.env.SPECOCD_AGENT) return process.env.SPECOCD_AGENT;
   for (const [envVar, agent] of AGENT_ENV_MARKERS) {
     if (process.env[envVar]) return agent;
   }
@@ -31,7 +31,7 @@ export function resolveIdentity(overrides: Partial<Identity> = {}): Identity {
   const agent = overrides.agent ?? detectAgent();
   const session_id =
     overrides.session_id ??
-    process.env.SPECDD_SESSION_ID ??
+    process.env.SPECOCD_SESSION_ID ??
     `${agent}:${os.userInfo().username}@${os.hostname()}`;
   return { agent, session_id };
 }

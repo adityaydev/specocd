@@ -25,11 +25,11 @@ import { verify, verifyInstruction } from "./commands/verify.js";
 import { changeDir, requireRoot } from "./paths.js";
 
 const program = new Command();
-program.name("specdd").description("Spec-driven development with multi-agent context coordination").version("0.1.0");
+program.name("specocd").description("Spec-driven development with multi-agent context coordination").version("0.1.0");
 
 function requireChange(root: string, change: string): void {
   if (!existsSync(changeDir(root, change))) {
-    throw new Error(`No such change: "${change}". Run \`specdd propose ${change}\` first.`);
+    throw new Error(`No such change: "${change}". Run \`specocd propose ${change}\` first.`);
   }
 }
 
@@ -42,15 +42,15 @@ function reportOversized(root: string, change: string): void {
 
 program
   .command("init")
-  .description("Scaffold .specdd/ and generate agent bindings")
+  .description("Scaffold .specocd/ and generate agent bindings")
   .action(() => {
     const root = process.cwd();
     const result = init(root);
-    console.log(result.alreadyInitialized ? "Refreshed .specdd/" : `Initialized .specdd/ in ${root}`);
+    console.log(result.alreadyInitialized ? "Refreshed .specocd/" : `Initialized .specocd/ in ${root}`);
     console.log(
       result.bindings.length > 0
         ? `Bindings: ${result.bindings.join(", ")}\n  ${result.bindingFiles.join("\n  ")}`
-        : "No agent tooling detected — bindings skipped (run `specdd bindings sync` later).",
+        : "No agent tooling detected — bindings skipped (run `specocd bindings sync` later).",
     );
   });
 
@@ -190,7 +190,7 @@ program
       return;
     }
     if (report.length === 0) {
-      console.log("No changes yet. Create one with `specdd propose <name>`.");
+      console.log("No changes yet. Create one with `specocd propose <name>`.");
       return;
     }
     for (const s of report) {
@@ -277,7 +277,7 @@ bindings
       only: opts.only?.split(",").map((s) => s.trim()).filter(Boolean),
     });
     if (result.bindings.length === 0) {
-      console.log("No agent tooling detected. Use `specdd bindings sync --all` to write them anyway.");
+      console.log("No agent tooling detected. Use `specocd bindings sync --all` to write them anyway.");
       return;
     }
     console.log(`Synced: ${result.bindings.join(", ")}`);

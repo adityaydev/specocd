@@ -34,7 +34,7 @@ export function digestInstruction(change: string, oversized: OversizedArtifact[]
     `Context cap exceeded for change "${change}":`,
     list,
     "",
-    `ACTION REQUIRED: run \`specdd digest ${change}\` to refresh the structural`,
+    `ACTION REQUIRED: run \`specocd digest ${change}\` to refresh the structural`,
     "digest, then condense the oversized artifacts above in it. Keep it under the cap.",
   ].join("\n");
 }
@@ -59,7 +59,7 @@ export function generateDigest(root: string, change: string, now = new Date()): 
   const lines = [
     `# Digest: ${change}`,
     "",
-    `_Generated ${now.toISOString()} by \`specdd digest\`. Structural extract — an agent may_`,
+    `_Generated ${now.toISOString()} by \`specocd digest\`. Structural extract — an agent may_`,
     "_condense the prose further, but keep these sections._",
     "",
     `- status: ${front.status ?? "unknown"}${front.approved === true ? " (approved)" : ""}`,

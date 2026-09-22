@@ -86,7 +86,7 @@ export class JiraClient {
       const permanent = [400, 401, 403, 404].includes(response.status);
       const hint =
         response.status === 401 || response.status === 403
-          ? " Check the email and API token in .specdd/credentials.yaml, and that the account can see this project."
+          ? " Check the email and API token in .specocd/credentials.yaml, and that the account can see this project."
           : response.status === 404
             ? " Check the ticket key and base_url."
             : "";

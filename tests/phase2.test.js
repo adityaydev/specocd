@@ -23,7 +23,7 @@ import { verify } from "../dist/commands/verify.js";
 
 const roots = [];
 function tempProject() {
-  const root = mkdtempSync(path.join(tmpdir(), "specdd-p2-"));
+  const root = mkdtempSync(path.join(tmpdir(), "specocd-p2-"));
   roots.push(root);
   init(root);
   return root;
@@ -151,7 +151,7 @@ describe("archive", () => {
 
     assert.equal(result.foldedRequirements, 2);
     assert.ok(existsSync(result.archivedTo), "archived folder missing");
-    assert.ok(!existsSync(path.join(root, ".specdd", "changes", change)), "change folder should be moved");
+    assert.ok(!existsSync(path.join(root, ".specocd", "changes", change)), "change folder should be moved");
 
     const spec = readFileSync(result.specFile, "utf8");
     assert.match(spec, /## R1: Throttling/);

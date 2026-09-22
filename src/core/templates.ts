@@ -10,7 +10,7 @@ approved: false
 created_at: ${createdAt}
 ---
 
-<!-- feature: which baseline spec in .specdd/specs/ this folds into on archive. -->
+<!-- feature: which baseline spec in .specocd/specs/ this folds into on archive. -->
 <!-- Point several changes at the same feature to grow one baseline spec. -->
 
 # ${change}
@@ -71,7 +71,7 @@ export function digestTemplate(change: string): string {
 
 <!--
 Auto-managed condensed context for agents working under a tight context budget.
-Regenerate with \`specdd digest ${change}\` when the CLI reports a size cap breach.
+Regenerate with \`specocd digest ${change}\` when the CLI reports a size cap breach.
 -->
 
 _No digest generated yet._

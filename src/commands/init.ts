@@ -2,9 +2,9 @@ import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { DEFAULT_CONFIG, saveConfig, type SpecddConfig } from "../config.js";
 import { detectBindings, writeBindings } from "../bindings/index.js";
-import { archiveDir, changesDir, configPath, specddPath, specsDir, bindingsDir } from "../paths.js";
+import { archiveDir, changesDir, configPath, specocdPath, specsDir, bindingsDir } from "../paths.js";
 
-const README = `# .specdd/
+const README = `# .specocd/
 
 Spec-driven development artifacts for this project.
 
@@ -28,7 +28,7 @@ export interface InitResult {
 export function init(root: string): InitResult {
   const alreadyInitialized = existsSync(configPath(root));
 
-  for (const dir of [specddPath(root), specsDir(root), changesDir(root), archiveDir(root), bindingsDir(root)]) {
+  for (const dir of [specocdPath(root), specsDir(root), changesDir(root), archiveDir(root), bindingsDir(root)]) {
     mkdirSync(dir, { recursive: true });
   }
 
@@ -37,7 +37,7 @@ export function init(root: string): InitResult {
   if (!alreadyInitialized) {
     const config: SpecddConfig = { ...DEFAULT_CONFIG, enabled_bindings: bindings };
     saveConfig(root, config);
-    writeFileSync(path.join(specddPath(root), "README.md"), README, "utf8");
+    writeFileSync(path.join(specocdPath(root), "README.md"), README, "utf8");
   }
 
   const bindingFiles = writeBindings(root, bindings);

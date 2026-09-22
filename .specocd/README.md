@@ -1,4 +1,4 @@
-# .specdd/
+# .specocd/
 
 Spec-driven development artifacts for this project.
 

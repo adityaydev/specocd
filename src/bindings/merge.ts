@@ -1,5 +1,5 @@
-export const BLOCK_START = "<!-- BEGIN specdd (generated — edits inside this block are overwritten) -->";
-export const BLOCK_END = "<!-- END specdd -->";
+export const BLOCK_START = "<!-- BEGIN specocd (generated — edits inside this block are overwritten) -->";
+export const BLOCK_END = "<!-- END specocd -->";
 
 /**
  * Splices generated content into a file that may already hold hand-written content

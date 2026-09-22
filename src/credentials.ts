@@ -2,11 +2,11 @@ import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import YAML from "yaml";
-import { specddPath } from "./paths.js";
+import { specocdPath } from "./paths.js";
 
 export const CREDENTIALS_FILE = "credentials.yaml";
 /** Path as it appears in .gitignore — relative to the repo root. */
-export const CREDENTIALS_IGNORE_ENTRY = ".specdd/credentials.yaml";
+export const CREDENTIALS_IGNORE_ENTRY = ".specocd/credentials.yaml";
 
 export interface JiraCredentials {
   base_url: string;
@@ -19,17 +19,17 @@ export interface Credentials {
 }
 
 export function credentialsPath(root: string): string {
-  return path.join(specddPath(root), CREDENTIALS_FILE);
+  return path.join(specocdPath(root), CREDENTIALS_FILE);
 }
 
 export const CREDENTIALS_TEMPLATE = `# SpecOCD credentials — NEVER commit this file.
-# It is added to .gitignore automatically by \`specdd jira setup\`.
+# It is added to .gitignore automatically by \`specocd jira setup\`.
 #
 # Create a JIRA API token at:
 #   https://id.atlassian.com/manage-profile/security/api-tokens
 #
 # Environment variables override these values:
-#   SPECDD_JIRA_BASE_URL, SPECDD_JIRA_EMAIL, SPECDD_JIRA_TOKEN
+#   SPECOCD_JIRA_BASE_URL, SPECOCD_JIRA_EMAIL, SPECOCD_JIRA_TOKEN
 
 jira:
   base_url: https://your-company.atlassian.net
@@ -41,9 +41,9 @@ export function loadCredentials(root: string): Credentials {
   const file = credentialsPath(root);
   const fromFile: Credentials = existsSync(file) ? ((YAML.parse(readFileSync(file, "utf8")) ?? {}) as Credentials) : {};
 
-  const base_url = process.env.SPECDD_JIRA_BASE_URL ?? fromFile.jira?.base_url;
-  const email = process.env.SPECDD_JIRA_EMAIL ?? fromFile.jira?.email;
-  const api_token = process.env.SPECDD_JIRA_TOKEN ?? fromFile.jira?.api_token;
+  const base_url = process.env.SPECOCD_JIRA_BASE_URL ?? fromFile.jira?.base_url;
+  const email = process.env.SPECOCD_JIRA_EMAIL ?? fromFile.jira?.email;
+  const api_token = process.env.SPECOCD_JIRA_TOKEN ?? fromFile.jira?.api_token;
 
   if (!base_url || !email || !api_token) return {};
   return { jira: { base_url: base_url.replace(/\/+$/, ""), email, api_token } };
@@ -52,8 +52,8 @@ export function loadCredentials(root: string): Credentials {
 export class MissingCredentialsError extends Error {
   constructor() {
     super(
-      "No JIRA credentials found. Run `specdd jira setup`, then fill in " +
-        `${CREDENTIALS_IGNORE_ENTRY} (or set SPECDD_JIRA_BASE_URL, SPECDD_JIRA_EMAIL, SPECDD_JIRA_TOKEN).`,
+      "No JIRA credentials found. Run `specocd jira setup`, then fill in " +
+        `${CREDENTIALS_IGNORE_ENTRY} (or set SPECOCD_JIRA_BASE_URL, SPECOCD_JIRA_EMAIL, SPECOCD_JIRA_TOKEN).`,
     );
   }
 }
@@ -95,7 +95,7 @@ export function assertCredentialsNotTracked(root: string): void {
   if (isTrackedByGit(root)) {
     throw new Error(
       `${CREDENTIALS_IGNORE_ENTRY} is tracked by git — your API token may already be in history.\n` +
-        "Remove it from tracking (`git rm --cached .specdd/credentials.yaml`), revoke that token,\n" +
+        "Remove it from tracking (`git rm --cached .specocd/credentials.yaml`), revoke that token,\n" +
         "issue a new one, and only then re-run this command.",
     );
   }

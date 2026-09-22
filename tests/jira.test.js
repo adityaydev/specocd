@@ -17,11 +17,11 @@ const CREDS = { base_url: "https://example.atlassian.net", email: "dev@example.c
 
 const roots = [];
 function tempProject() {
-  const root = mkdtempSync(path.join(tmpdir(), "specdd-jira-"));
+  const root = mkdtempSync(path.join(tmpdir(), "specocd-jira-"));
   roots.push(root);
   init(root);
   writeFileSync(
-    path.join(root, ".specdd", "credentials.yaml"),
+    path.join(root, ".specocd", "credentials.yaml"),
     `jira:\n  base_url: ${CREDS.base_url}\n  email: ${CREDS.email}\n  api_token: ${CREDS.api_token}\n`,
     "utf8",
   );
@@ -32,7 +32,7 @@ after(() => roots.forEach((r) => rmSync(r, { recursive: true, force: true })));
 // Env vars would override the credentials file, so keep the test env clean.
 const savedEnv = {};
 before(() => {
-  for (const key of ["SPECDD_JIRA_BASE_URL", "SPECDD_JIRA_EMAIL", "SPECDD_JIRA_TOKEN"]) {
+  for (const key of ["SPECOCD_JIRA_BASE_URL", "SPECOCD_JIRA_EMAIL", "SPECOCD_JIRA_TOKEN"]) {
     savedEnv[key] = process.env[key];
     delete process.env[key];
   }
@@ -110,7 +110,7 @@ describe("credentials", () => {
   test("loads from file and normalizes a trailing slash", () => {
     const root = tempProject();
     writeFileSync(
-      path.join(root, ".specdd", "credentials.yaml"),
+      path.join(root, ".specocd", "credentials.yaml"),
       `jira:\n  base_url: ${CREDS.base_url}/\n  email: ${CREDS.email}\n  api_token: t\n`,
       "utf8",
     );
@@ -119,28 +119,28 @@ describe("credentials", () => {
 
   test("errors with guidance when the token is blank", () => {
     const root = tempProject();
-    writeFileSync(path.join(root, ".specdd", "credentials.yaml"), `jira:\n  base_url: x\n  email: y\n  api_token: ""\n`, "utf8");
-    assert.throws(() => requireJiraCredentials(root), /specdd jira setup/);
+    writeFileSync(path.join(root, ".specocd", "credentials.yaml"), `jira:\n  base_url: x\n  email: y\n  api_token: ""\n`, "utf8");
+    assert.throws(() => requireJiraCredentials(root), /specocd jira setup/);
   });
 
   test("env vars override the file", () => {
     const root = tempProject();
-    process.env.SPECDD_JIRA_TOKEN = "from-env";
+    process.env.SPECOCD_JIRA_TOKEN = "from-env";
     try {
       assert.equal(loadCredentials(root).jira.api_token, "from-env");
     } finally {
-      delete process.env.SPECDD_JIRA_TOKEN;
+      delete process.env.SPECOCD_JIRA_TOKEN;
     }
   });
 
   test("setup writes a template and gitignores it", () => {
-    const root = mkdtempSync(path.join(tmpdir(), "specdd-setup-"));
+    const root = mkdtempSync(path.join(tmpdir(), "specocd-setup-"));
     roots.push(root);
     init(root);
     const result = setup(root);
     assert.ok(result.created);
     assert.ok(result.gitignoreUpdated);
-    assert.match(readFileSync(path.join(root, ".gitignore"), "utf8"), /\.specdd\/credentials\.yaml/);
+    assert.match(readFileSync(path.join(root, ".gitignore"), "utf8"), /\.specocd\/credentials\.yaml/);
     assert.equal(result.configured, false, "template alone must not count as configured");
   });
 
@@ -149,7 +149,7 @@ describe("credentials", () => {
     ensureGitignored(root);
     assert.equal(ensureGitignored(root), false);
     const ignore = readFileSync(path.join(root, ".gitignore"), "utf8");
-    assert.equal(ignore.split("\n").filter((l) => l.trim() === ".specdd/credentials.yaml").length, 1);
+    assert.equal(ignore.split("\n").filter((l) => l.trim() === ".specocd/credentials.yaml").length, 1);
   });
 });
 

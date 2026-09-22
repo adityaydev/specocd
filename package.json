@@ -4,7 +4,7 @@
   "description": "Lightweight, tool-agnostic spec-driven development framework with multi-agent context coordination",
   "type": "module",
   "bin": {
-    "specdd": "dist/cli.js"
+    "specocd": "dist/cli.js"
   },
   "files": [
     "dist"

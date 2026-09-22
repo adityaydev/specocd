@@ -13,7 +13,7 @@ import { status } from "../dist/commands/status.js";
 
 const roots = [];
 function tempProject() {
-  const root = mkdtempSync(path.join(tmpdir(), "specdd-test-"));
+  const root = mkdtempSync(path.join(tmpdir(), "specocd-test-"));
   roots.push(root);
   init(root);
   return root;
@@ -156,6 +156,6 @@ describe("init", () => {
     const root = tempProject();
     const second = init(root);
     assert.equal(second.alreadyInitialized, true);
-    assert.match(readFileSync(path.join(root, ".specdd", "config.yaml"), "utf8"), /schema_version: 1/);
+    assert.match(readFileSync(path.join(root, ".specocd", "config.yaml"), "utf8"), /schema_version: 1/);
   });
 });

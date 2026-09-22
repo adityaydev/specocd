@@ -12,7 +12,7 @@ import { init } from "../dist/commands/init.js";
 
 const roots = [];
 function tempProject() {
-  const root = mkdtempSync(path.join(tmpdir(), "specdd-b-"));
+  const root = mkdtempSync(path.join(tmpdir(), "specocd-b-"));
   roots.push(root);
   init(root);
   return root;
@@ -62,7 +62,7 @@ describe("binding generators", () => {
       assert.ok(files.length > 0, `${binding.name} generated nothing`);
       for (const file of files) {
         assert.ok(file.path && file.contents, `${binding.name} produced an incomplete file`);
-        assert.match(file.contents, /specdd/, `${binding.name} omits workflow instructions`);
+        assert.match(file.contents, /specocd/, `${binding.name} omits workflow instructions`);
       }
     }
   });
@@ -95,7 +95,7 @@ describe("writeBindings", () => {
   test("replace-mode files are fully owned", () => {
     const root = tempProject();
     writeBindings(root, ["cursor"]);
-    const rule = path.join(root, ".cursor", "rules", "specdd.mdc");
+    const rule = path.join(root, ".cursor", "rules", "specocd.mdc");
     writeFileSync(rule, "stale content", "utf8");
     writeBindings(root, ["cursor"]);
     assert.ok(!readFileSync(rule, "utf8").includes("stale content"));
@@ -113,8 +113,8 @@ describe("bindings command", () => {
     const result = syncBindings(root, { all: true });
     assert.deepEqual(result.bindings, BINDING_NAMES);
     assert.deepEqual(loadConfig(root).enabled_bindings, BINDING_NAMES);
-    assert.ok(existsSync(path.join(root, ".cursor", "rules", "specdd.mdc")));
-    assert.ok(existsSync(path.join(root, ".github", "prompts", "specdd-work.prompt.md")));
+    assert.ok(existsSync(path.join(root, ".cursor", "rules", "specocd.mdc")));
+    assert.ok(existsSync(path.join(root, ".github", "prompts", "specocd-work.prompt.md")));
   });
 
   test("sync --only restricts to the named bindings", () => {

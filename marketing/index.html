@@ -51,13 +51,13 @@
           <span class="terminal-title">cursor: two agents, one task</span>
         </div>
         <div class="terminal-body">
-<pre><span class="c-prompt">$</span> specdd claim add-user-auth T1
+<pre><span class="c-prompt">$</span> specocd claim add-user-auth T1
 <span class="c-red">CONFLICT: Task T1 is already claimed by claude-code</span>
 <span class="c-red">(session claude-code:dev@studio, last heartbeat 10:24:02Z).</span>
 <span class="c-dim">Wait for it to be released, or let the claim go stale.</span>
 <span class="c-dim">exit 2</span>
 
-<span class="c-prompt">$</span> specdd claim add-user-auth T2
+<span class="c-prompt">$</span> specocd claim add-user-auth T2
 Claimed T2 in "add-user-auth" as cursor (cursor:dev@studio).
 
 <span class="c-blue">Prior decisions on T2 (read before you start):</span>
@@ -121,7 +121,7 @@ Claimed T2 in "add-user-auth" as cursor (cursor:dev@studio).
 
       <div class="steps">
         <div class="step">
-          <code>specdd claim</code>
+          <code>specocd claim</code>
           <h3>Claim before you touch code</h3>
           <p>
             Claims live in <code style="background: none; padding: 0">claims.yaml</code> beside the
@@ -130,7 +130,7 @@ Claimed T2 in "add-user-auth" as cursor (cursor:dev@studio).
           </p>
         </div>
         <div class="step">
-          <code>specdd log</code>
+          <code>specocd log</code>
           <h3>Record the why, not the what</h3>
           <p>
             Decisions and blockers append to a per-change log tagged by task. The diff already shows
@@ -138,7 +138,7 @@ Claimed T2 in "add-user-auth" as cursor (cursor:dev@studio).
           </p>
         </div>
         <div class="step">
-          <code>specdd release</code>
+          <code>specocd release</code>
           <h3>Hand off cleanly</h3>
           <p>
             Completed, released and abandoned are distinct states. Claims carry a heartbeat, so a
@@ -163,10 +163,10 @@ Claimed T2 in "add-user-auth" as cursor (cursor:dev@studio).
       <div class="terminal">
         <div class="terminal-bar">
           <span class="dot"></span><span class="dot"></span><span class="dot"></span>
-          <span class="terminal-title">specdd verify rate-limiting</span>
+          <span class="terminal-title">specocd verify rate-limiting</span>
         </div>
         <div class="terminal-body">
-<pre><span class="c-prompt">$</span> specdd verify rate-limiting
+<pre><span class="c-prompt">$</span> specocd verify rate-limiting
 rate-limiting
   requirements: 2
   tasks:        2/2 done
@@ -306,19 +306,19 @@ rate-limiting
       <div class="split">
         <div class="flow">
           <div class="flow-step">
-            specdd jira start PROJ-123
+            specocd jira start PROJ-123
             <span>Ticket becomes a change</span>
           </div>
           <div class="flow-step">
-            specdd claim / log
+            specocd claim / log
             <span>Agent plans and implements</span>
           </div>
           <div class="flow-step">
-            specdd verify
+            specocd verify
             <span>Criteria checked against code</span>
           </div>
           <div class="flow-step">
-            specdd jira handoff
+            specocd jira handoff
             <span>Comments, moves to QC</span>
           </div>
           <div class="flow-step fallback">
@@ -351,23 +351,23 @@ rate-limiting
         <p class="eyebrow">Get started</p>
         <h2>Five minutes, no restructuring.</h2>
         <p class="lead">
-          Run it in a repo you already have. Init writes a <code>.specdd/</code> directory, detects
+          Run it in a repo you already have. Init writes a <code>.specocd/</code> directory, detects
           your agent tooling, and generates the matching slash commands. It touches nothing else.
         </p>
       </div>
 
       <div class="install">
-        <code id="install-cmd">npm install -g spec-ocd &amp;&amp; specdd init</code>
+        <code id="install-cmd">npm install -g spec-ocd &amp;&amp; specocd init</code>
         <button class="copy" type="button" data-copy="#install-cmd">Copy</button>
       </div>
 
       <div class="cmd-list">
-        <div class="cmd"><code>specdd propose "rate limiting"</code><span>Scaffold a change</span></div>
-        <div class="cmd"><code>specdd status</code><span>Claims, stale claims, cap breaches</span></div>
-        <div class="cmd"><code>specdd claim &lt;change&gt; T1</code><span>Take a task, see prior decisions</span></div>
-        <div class="cmd"><code>specdd log &lt;change&gt; --task T1</code><span>Record a decision or blocker</span></div>
-        <div class="cmd"><code>specdd verify &lt;change&gt;</code><span>Check before archiving</span></div>
-        <div class="cmd"><code>specdd archive &lt;change&gt;</code><span>Fold into the baseline spec</span></div>
+        <div class="cmd"><code>specocd propose "rate limiting"</code><span>Scaffold a change</span></div>
+        <div class="cmd"><code>specocd status</code><span>Claims, stale claims, cap breaches</span></div>
+        <div class="cmd"><code>specocd claim &lt;change&gt; T1</code><span>Take a task, see prior decisions</span></div>
+        <div class="cmd"><code>specocd log &lt;change&gt; --task T1</code><span>Record a decision or blocker</span></div>
+        <div class="cmd"><code>specocd verify &lt;change&gt;</code><span>Check before archiving</span></div>
+        <div class="cmd"><code>specocd archive &lt;change&gt;</code><span>Fold into the baseline spec</span></div>
       </div>
     </div>
   </section>

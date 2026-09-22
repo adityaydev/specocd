@@ -4,4 +4,4 @@ dist/
 .DS_Store
 
 # SpecOCD credentials — never commit
-.specdd/credentials.yaml
+.specocd/credentials.yaml

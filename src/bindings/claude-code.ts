@@ -5,7 +5,7 @@ import { WORKFLOW } from "./workflow.js";
 
 function command(name: string, description: string, body: string): GeneratedFile {
   return {
-    path: path.join(".claude", "commands", `specdd-${name}.md`),
+    path: path.join(".claude", "commands", `specocd-${name}.md`),
     contents: `---\ndescription: ${description}\n---\n\n${body}\n`,
     mode: "replace",
   };
@@ -28,7 +28,7 @@ export const claudeCodeBinding: BindingGenerator = {
         "Create a new SpecOCD change (proposal + requirement deltas + tasks)",
         `Create a new change for: $ARGUMENTS
 
-Run \`specdd propose <slug>\` to scaffold the change folder, then fill in:
+Run \`specocd propose <slug>\` to scaffold the change folder, then fill in:
 - \`proposal.md\` — why this change, what is in and out of scope
 - \`spec-delta.md\` — acceptance criteria as WHEN/THEN requirements with ids (R1, R2...)
 - \`tasks.md\` — implementation tasks with stable ids (T1, T2...)
@@ -48,7 +48,7 @@ as a decision rather than silently expanding the work.`,
       command(
         "status",
         "Show SpecOCD claims, stale claims and flagged conflicts",
-        `Run \`specdd status $ARGUMENTS\` and summarize: which tasks are actively claimed
+        `Run \`specocd status $ARGUMENTS\` and summarize: which tasks are actively claimed
 and by whom, which claims have gone stale (owner likely died — safe to take over), and
 anything flagged as conflicting.
 
@@ -59,7 +59,7 @@ ${WORKFLOW}`,
         "Verify a SpecOCD change against its WHEN/THEN acceptance criteria",
         `Verify: $ARGUMENTS
 
-Run \`specdd verify <change>\`, then check each WHEN/THEN requirement against the actual
+Run \`specocd verify <change>\`, then check each WHEN/THEN requirement against the actual
 implementation. Report per-requirement pass/fail with evidence (file:line, test output).
 
 ${WORKFLOW}`,
