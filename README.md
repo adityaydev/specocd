@@ -16,7 +16,7 @@ See [REQUIREMENTS.md](REQUIREMENTS.md) for the full analysis and design rational
 ## Install
 
 ```bash
-npm install -g spec-ocd
+npm install -g specocd
 ```
 
 ## Quickstart
