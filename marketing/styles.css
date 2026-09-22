@@ -207,9 +207,10 @@ h3 {
   text-decoration: none;
 }
 
+/* Scales with the wordmark it sits beside, so nav and footer stay in proportion. */
 .mark {
-  width: 19px;
-  height: 19px;
+  width: 1.3em;
+  height: 1.3em;
   flex: none;
 }
 
