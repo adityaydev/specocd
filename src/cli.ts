@@ -171,10 +171,15 @@ program
 program
   .command("status")
   .argument("[change]")
+  .option("--json", "machine-readable output")
   .description("Show claims, stale claims and cap breaches")
-  .action((change?: string) => {
+  .action((change: string | undefined, opts: { json?: boolean }) => {
     const root = requireRoot();
     const report = status(root, change);
+    if (opts.json) {
+      console.log(JSON.stringify(report, null, 2));
+      return;
+    }
     if (report.length === 0) {
       console.log("No changes yet. Create one with `specdd propose <name>`.");
       return;
@@ -196,11 +201,17 @@ program
 program
   .command("verify")
   .argument("<change>")
+  .option("--json", "machine-readable output")
   .description("Check a change against its acceptance criteria before archiving")
-  .action((change: string) => {
+  .action((change: string, opts: { json?: boolean }) => {
     const root = requireRoot();
     requireChange(root, change);
     const report = verify(root, change);
+
+    if (opts.json) {
+      console.log(JSON.stringify(report, null, 2));
+      process.exit(report.blockers.length > 0 ? 1 : 0);
+    }
 
     console.log(`${report.change}`);
     console.log(`  requirements: ${report.requirements.length}`);

@@ -217,6 +217,9 @@ claims:
 
 ### 8.4 Implementation phasing (per decision #8)
 
+All four phases are implemented as of 2026-09-23 (53 tests passing). The framework is
+self-hosted — this repo's own `.specdd/` directory tracks its development.
+
 - **Phase 1 — Core + Claude Code binding**: `init`, `propose`, `claim`/`release`, `log`, `status`, directory/schema scaffolding, Claude Code slash-command bindings. This is where the concurrency-safety mechanics (the novel part) get validated against real use.
 - **Phase 2 — Verify/Archive loop**: `verify`, `archive`, digest auto-regeneration, `require_approval` gate.
 - **Phase 3 — Binding breadth**: Cursor, Copilot, Codex bindings via the pluggable binding-generator interface (FR5.4).

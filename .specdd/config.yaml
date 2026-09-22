@@ -1,0 +1,6 @@
+schema_version: 1
+require_approval: false
+size_cap_kb: 50
+stale_claim_minutes: 60
+enabled_bindings:
+  - claude-code

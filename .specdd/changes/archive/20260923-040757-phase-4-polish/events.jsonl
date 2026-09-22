@@ -1,0 +1,3 @@
+{"schema_version":1,"ts":"2026-09-22T22:37:53.400Z","task_id":"T1","agent":"claude-code","session_id":"claude-code:adityay@Adityas-MacBook-Air-2.local","type":"decision","message":"verify --json exits non-zero on blockers so it works as a CI gate"}
+{"schema_version":1,"ts":"2026-09-22T22:37:53.457Z","task_id":"T4","agent":"claude-code","session_id":"claude-code:adityay@Adityas-MacBook-Air-2.local","type":"decision","message":"Self-hosting on this repo is the brownfield proof: init touched no existing files"}
+{"schema_version":1,"ts":"2026-09-22T22:37:57.597Z","task_id":null,"agent":"claude-code","session_id":"claude-code:adityay@Adityas-MacBook-Air-2.local","type":"status","message":"Archived into baseline spec \"phase-4-polish\""}

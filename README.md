@@ -116,11 +116,32 @@ Off by default — normal PR review is your gate. Teams that want a hard block s
 `require_approval: true` in `.specdd/config.yaml`, which makes `archive` refuse until a
 human sets `approved: true` in the change's `proposal.md`.
 
+## Use in CI
+
+`specdd status` and `specdd verify` accept `--json`. Exit codes are a stable contract:
+
+| Code | Meaning |
+|---|---|
+| `0` | OK |
+| `1` | Blockers present (verify), or a usage/state error |
+| `2` | Claim conflict — the task is already held by a live session |
+
+```yaml
+- run: specdd verify "$CHANGE" --json
+```
+
+## Self-hosted
+
+Spec-OCD manages its own development: this repo has a `.specdd/` directory, and the
+Phase 4 work was proposed, verified and archived through the tool itself. `specdd init`
+ran on an existing repository without modifying a single existing file — the brownfield
+adoption requirement, demonstrated rather than asserted.
+
 ## Status
 
-Phases 1–3 are implemented and tested (46 tests): core coordination, the full
-propose → claim → verify → archive lifecycle, and bindings for all four launch agents.
-Phase 4 (polish, npm publish) is next — see REQUIREMENTS.md §8.4.
+All four phases are implemented and tested (53 tests, incl. CLI exit-code contract):
+core coordination, the full propose → claim → verify → archive lifecycle, bindings for all
+four launch agents, and CI/packaging polish. Not yet published to npm.
 
 ## Never put secrets in `.specdd/`
 
