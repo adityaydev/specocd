@@ -1,0 +1,37 @@
+{
+  "name": "spec-ocd",
+  "version": "0.1.0",
+  "description": "Lightweight, tool-agnostic spec-driven development framework with multi-agent context coordination",
+  "type": "module",
+  "bin": {
+    "specdd": "dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "node --test tests/**/*.test.js",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "spec-driven-development",
+    "sdd",
+    "ai-agents",
+    "claude-code",
+    "cursor",
+    "copilot"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^12.1.0",
+    "yaml": "^2.5.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.5",
+    "typescript": "^5.6.3"
+  }
+}
