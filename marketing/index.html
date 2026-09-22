@@ -8,19 +8,38 @@
 <link rel="stylesheet" href="styles.css" />
 
 <!--
-  The mark: three lanes are agents working in parallel; the one solid node is the
-  single live claim. Defined once and referenced wherever the wordmark appears.
+  The mark: a spec sheet whose requirements are checked off, with a code glyph
+  overlapping it. Document and requirement lines take the ink token; the checks
+  and the code glyph take the accent, so both themes resolve from the palette.
+  Defined once and referenced wherever the wordmark appears.
 -->
 <svg width="0" height="0" style="position: absolute" aria-hidden="true" focusable="false">
-  <symbol id="specocd-mark" viewBox="0 0 24 24">
-    <rect x="2.5" y="2.5" width="19" height="19" rx="5.5" fill="none" stroke="currentColor" stroke-width="1.6" />
-    <g stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.4">
-      <path d="M7.9 7.6v8.8" />
-      <path d="M16.1 7.6v8.8" />
-      <path d="M12 7.6v1.5" />
-      <path d="M12 14.9v1.5" />
+  <symbol id="specocd-mark" viewBox="0 0 48 48">
+    <g fill="none" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round">
+      <!-- sheet, left open at the bottom right where the code glyph sits over it -->
+      <g stroke="currentColor">
+        <path d="M25.5 4.5H11a6 6 0 0 0-6 6v26.5a6 6 0 0 0 6 6h11" />
+        <path d="M25.5 4.5 35 14v11" />
+        <path d="M25.5 4.5v8a2 2 0 0 0 2 2H35" />
+      </g>
+      <!-- checked requirements -->
+      <g stroke="var(--accent)">
+        <path d="m10 16.1 2.5 2.5 4.8-5.3" />
+        <path d="m10 24.6 2.5 2.5 4.8-5.3" />
+        <path d="m10 33.1 2.5 2.5 4.8-5.3" />
+      </g>
+      <g stroke="currentColor">
+        <path d="M21.6 16.7h8" />
+        <path d="M21.6 25.2h8" />
+        <path d="M21.6 33.7h3.4" />
+      </g>
+      <!-- code glyph, protruding past the sheet's bottom-right -->
+      <g stroke="var(--accent)">
+        <path d="m33.6 31.6-4.3 5.5 4.3 5.5" />
+        <path d="M39.8 29.9 36.4 44.3" />
+        <path d="m42.2 31.6 4.2 5.5-4.2 5.5" />
+      </g>
     </g>
-    <circle cx="12" cy="12" r="2.45" fill="var(--accent)" />
   </symbol>
 </svg>
 
