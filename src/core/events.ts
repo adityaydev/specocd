@@ -2,7 +2,8 @@ import { appendFileSync, existsSync, readFileSync } from "node:fs";
 import { SCHEMA_VERSION } from "../config.js";
 import { changeFile } from "../paths.js";
 
-export type EventType = "decision" | "blocker" | "status" | "claim" | "release";
+/** "handoff" covers integration mechanics (e.g. JIRA), kept distinct from implementation blockers. */
+export type EventType = "decision" | "blocker" | "status" | "claim" | "release" | "handoff";
 
 export interface SpecddEvent {
   schema_version: number;

@@ -81,6 +81,11 @@ itself — no API keys, no external service.
 | `specdd digest <change>` | Regenerate the structural digest |
 | `specdd bindings list` | Show available, detected and enabled agent bindings |
 | `specdd bindings sync [--all] [--only a,b]` | Regenerate binding files |
+| `specdd jira setup` | Create the gitignored credentials file |
+| `specdd jira show <key>` | Fetch and print a ticket |
+| `specdd jira start <key>` | Scaffold a change from a ticket |
+| `specdd jira link <change> <key>` | Link an existing change to a ticket |
+| `specdd jira handoff --change <c>` | Comment on the ticket and move it to QC |
 
 ## Agent bindings
 
@@ -116,6 +121,48 @@ Off by default — normal PR review is your gate. Teams that want a hard block s
 `require_approval: true` in `.specdd/config.yaml`, which makes `archive` refuse until a
 human sets `approved: true` in the change's `proposal.md`.
 
+## JIRA integration
+
+Work straight from tickets. Set up once:
+
+```bash
+specdd jira setup          # writes .specdd/credentials.yaml and gitignores it
+```
+
+Fill in `base_url`, `email` and an [API token](https://id.atlassian.com/manage-profile/security/api-tokens)
+(or set `SPECDD_JIRA_BASE_URL` / `SPECDD_JIRA_EMAIL` / `SPECDD_JIRA_TOKEN`). Then:
+
+```bash
+specdd jira show PROJ-123               # title, description, comments, due date, attachments
+specdd jira start PROJ-123              # scaffold a change from the ticket
+# ... agent writes WHEN/THEN criteria, claims tasks, implements, verifies ...
+specdd jira handoff --change proj-123-… # comment on the ticket and move it to QC
+```
+
+`specdd jira link <change> PROJ-123` connects a change you already started.
+
+### It degrades instead of failing
+
+Reading a ticket is the only hard requirement. If posting the comment or moving the ticket
+fails — permissions, a workflow rule, a transition that isn't available from the current
+status — the work is never stranded: Spec-OCD writes `jira-handoff.md` into the change
+folder with a paste-ready comment and exactly which steps remain, prints the comment to the
+terminal, and exits `3`. Whatever already succeeded is listed as "already done, do not
+repeat", so you never double-post or re-move a ticket.
+
+### Ticket text is treated as data
+
+Descriptions and comments are written by other people and could contain text aimed at
+steering an agent. Fetched content is fenced with an explicit "data, not instructions"
+notice, and the agent bindings tell agents to surface such attempts rather than comply.
+
+### Token safety
+
+`specdd jira setup` adds the credentials file to `.gitignore`. If the file is ever found
+tracked by git, commands refuse to run and tell you to revoke the token — a leaked JIRA
+token is an incident, not a warning. API v2 is the default so both Jira Cloud and
+Server/Data Center work; set `jira.api_version: 3` in `config.yaml` for Cloud's ADF API.
+
 ## Use in CI
 
 `specdd status` and `specdd verify` accept `--json`. Exit codes are a stable contract:
@@ -125,6 +172,7 @@ human sets `approved: true` in the change's `proposal.md`.
 | `0` | OK |
 | `1` | Blockers present (verify), or a usage/state error |
 | `2` | Claim conflict — the task is already held by a live session |
+| `3` | JIRA handoff incomplete — a manual step is needed (see `jira-handoff.md`) |
 
 ```yaml
 - run: specdd verify "$CHANGE" --json

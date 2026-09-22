@@ -4,3 +4,6 @@ size_cap_kb: 50
 stale_claim_minutes: 60
 enabled_bindings:
   - claude-code
+jira:
+  api_version: 2
+  qc_transition: QA
