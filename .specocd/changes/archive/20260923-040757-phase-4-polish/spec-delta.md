@@ -17,5 +17,5 @@
 
 ## R4: Self-hosting
 
-- **WHEN** Spec-OCD is initialized on its own repository
+- **WHEN** SpecOCD is initialized on its own repository
 - **THEN** the framework shall manage its own changes without special-casing, proving the brownfield adoption requirement
