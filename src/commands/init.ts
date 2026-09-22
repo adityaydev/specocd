@@ -1,6 +1,6 @@
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
-import { DEFAULT_CONFIG, saveConfig, type SpecddConfig } from "../config.js";
+import { DEFAULT_CONFIG, saveConfig, type SpecOCDConfig } from "../config.js";
 import { detectBindings, writeBindings } from "../bindings/index.js";
 import { archiveDir, changesDir, configPath, specocdPath, specsDir, bindingsDir } from "../paths.js";
 
@@ -35,7 +35,7 @@ export function init(root: string): InitResult {
   const bindings = detectBindings(root);
 
   if (!alreadyInitialized) {
-    const config: SpecddConfig = { ...DEFAULT_CONFIG, enabled_bindings: bindings };
+    const config: SpecOCDConfig = { ...DEFAULT_CONFIG, enabled_bindings: bindings };
     saveConfig(root, config);
     writeFileSync(path.join(specocdPath(root), "README.md"), README, "utf8");
   }

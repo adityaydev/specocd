@@ -1,5 +1,5 @@
 import type { VerifyReport } from "../../commands/verify.js";
-import type { SpecddEvent } from "../../core/events.js";
+import type { SpecOCDEvent } from "../../core/events.js";
 import type { JiraTicket } from "./types.js";
 
 /**
@@ -114,7 +114,7 @@ Full ticket (description, comments, attachments) is in \`jira-ticket.md\`.
 export function handoffComment(
   ticket: JiraTicket,
   report: VerifyReport,
-  events: SpecddEvent[],
+  events: SpecOCDEvent[],
   opts: { qcStage: string; transitioned: boolean },
 ): string {
   const decisions = events.filter((e) => e.type === "decision").slice(-10);

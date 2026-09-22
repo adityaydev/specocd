@@ -3,7 +3,7 @@ import path from "node:path";
 
 export const SPECOCD_DIR = ".specocd";
 
-export class SpecddNotInitializedError extends Error {
+export class SpecOCDNotInitializedError extends Error {
   constructor() {
     super("No .specocd/ directory found. Run `specocd init` first.");
   }
@@ -22,7 +22,7 @@ export function findRoot(start: string = process.cwd()): string | null {
 
 export function requireRoot(start?: string): string {
   const root = findRoot(start);
-  if (!root) throw new SpecddNotInitializedError();
+  if (!root) throw new SpecOCDNotInitializedError();
   return root;
 }
 

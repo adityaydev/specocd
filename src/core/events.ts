@@ -5,7 +5,7 @@ import { changeFile } from "../paths.js";
 /** "handoff" covers integration mechanics (e.g. JIRA), kept distinct from implementation blockers. */
 export type EventType = "decision" | "blocker" | "status" | "claim" | "release" | "handoff";
 
-export interface SpecddEvent {
+export interface SpecOCDEvent {
   schema_version: number;
   ts: string;
   task_id: string | null;
@@ -22,9 +22,9 @@ function eventsPath(root: string, change: string): string {
 export function appendEvent(
   root: string,
   change: string,
-  event: Omit<SpecddEvent, "schema_version" | "ts"> & { ts?: string },
-): SpecddEvent {
-  const full: SpecddEvent = {
+  event: Omit<SpecOCDEvent, "schema_version" | "ts"> & { ts?: string },
+): SpecOCDEvent {
+  const full: SpecOCDEvent = {
     schema_version: SCHEMA_VERSION,
     ts: event.ts ?? new Date().toISOString(),
     task_id: event.task_id,
@@ -37,12 +37,12 @@ export function appendEvent(
   return full;
 }
 
-export function readEvents(root: string, change: string, taskId?: string): SpecddEvent[] {
+export function readEvents(root: string, change: string, taskId?: string): SpecOCDEvent[] {
   const file = eventsPath(root, change);
   if (!existsSync(file)) return [];
   const events = readFileSync(file, "utf8")
     .split("\n")
     .filter((line) => line.trim() !== "")
-    .map((line) => JSON.parse(line) as SpecddEvent);
+    .map((line) => JSON.parse(line) as SpecOCDEvent);
   return taskId ? events.filter((e) => e.task_id === taskId) : events;
 }

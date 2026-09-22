@@ -11,7 +11,7 @@ export interface JiraSettings {
   qc_transition: string;
 }
 
-export interface SpecddConfig {
+export interface SpecOCDConfig {
   schema_version: number;
   require_approval: boolean;
   size_cap_kb: number;
@@ -20,7 +20,7 @@ export interface SpecddConfig {
   jira: JiraSettings;
 }
 
-export const DEFAULT_CONFIG: SpecddConfig = {
+export const DEFAULT_CONFIG: SpecOCDConfig = {
   schema_version: SCHEMA_VERSION,
   require_approval: false,
   size_cap_kb: 50,
@@ -32,11 +32,11 @@ export const DEFAULT_CONFIG: SpecddConfig = {
   },
 };
 
-export function loadConfig(root: string): SpecddConfig {
+export function loadConfig(root: string): SpecOCDConfig {
   const raw = YAML.parse(readFileSync(configPath(root), "utf8")) ?? {};
   return { ...DEFAULT_CONFIG, ...raw, jira: { ...DEFAULT_CONFIG.jira, ...(raw.jira ?? {}) } };
 }
 
-export function saveConfig(root: string, config: SpecddConfig): void {
+export function saveConfig(root: string, config: SpecOCDConfig): void {
   writeFileSync(configPath(root), YAML.stringify(config), "utf8");
 }
