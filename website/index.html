@@ -323,7 +323,7 @@
       <a href="#problem">Problem</a>
       <a href="#how">How it works</a>
       <a href="#git">Git</a>
-      <a href="#compare">Compare</a>
+      <a href="#features">Features</a>
       <a href="#jira">JIRA</a>
       <a class="nav-cta" href="#start">Get started</a>
     </nav>
@@ -343,7 +343,7 @@
       </p>
       <div class="hero-actions rise rise-4">
         <a class="btn btn-primary" href="#start">Get started</a>
-        <a class="btn btn-quiet" href="#compare">See the comparison</a>
+        <a class="btn btn-quiet" href="#features">See the features</a>
       </div>
       <p class="hero-note rise rise-4">
         A Node CLI for any language, in new or existing repos. Works with Claude Code, Cursor,
@@ -639,14 +639,14 @@ Approved and committed a3f91c2 on fix/PROJ-42-login-timeout.
     </div>
   </section>
 
-  <section id="compare">
+  <section id="features">
     <div class="wrap">
       <div class="section-head">
-        <p class="eyebrow">Compare</p>
-        <h2>What the others leave to convention.</h2>
+        <p class="eyebrow">Features</p>
+        <h2>Everything the coordination layer does.</h2>
         <p class="lead">
-          Each of these is good at something. None of them arbitrates concurrent work, which is the
-          only reason SpecOCD exists.
+          Plain files in your repository, one command each, and nothing that needs a service or
+          an API key to work.
         </p>
       </div>
 
@@ -655,95 +655,95 @@ Approved and committed a3f91c2 on fix/PROJ-42-login-timeout.
           <thead>
             <tr>
               <th scope="col">Capability</th>
-              <th scope="col" class="ours">SpecOCD</th>
-              <th scope="col">OpenSpec</th>
-              <th scope="col">spec-kit</th>
-              <th scope="col">Kiro</th>
-              <th scope="col">BMAD</th>
+              <th scope="col">What it does</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <th scope="row">Task claims with conflict detection</th>
-              <td class="ours"><span class="yes">Built in</span></td>
-              <td><span class="partial">Worktree isolation (beta)</span></td>
-              <td><span class="no">None</span></td>
-              <td><span class="no">None</span></td>
-              <td><span class="no">Sequential relay</span></td>
+              <th scope="row">Task claims</th>
+              <td>
+                An agent claims a task before touching code. A second agent claiming a task a live
+                session already holds fails with exit code 2, never a silent overwrite. Claims are
+                written under a cross-process lock, so concurrent agents cannot lose each other's.
+              </td>
             </tr>
             <tr>
               <th scope="row">Stale-session recovery</th>
-              <td class="ours"><span class="yes">Heartbeat and takeover</span></td>
-              <td><span class="no">None</span></td>
-              <td><span class="no">None</span></td>
-              <td><span class="no">None</span></td>
-              <td><span class="no">None</span></td>
+              <td>
+                Claims carry a heartbeat that logging refreshes. A session that dies goes stale and
+                its task can be taken over cleanly; the old claim is marked abandoned, not deleted.
+              </td>
             </tr>
             <tr>
-              <th scope="row">Prior decisions replayed on pickup</th>
-              <td class="ours"><span class="yes">Automatic</span></td>
-              <td><span class="no">None</span></td>
-              <td><span class="no">None</span></td>
-              <td><span class="no">None</span></td>
-              <td><span class="partial">Document handoff</span></td>
+              <th scope="row">Decision log</th>
+              <td>
+                Decisions and blockers append per change, tagged by task. Claiming a task prints
+                what was already decided on it, so the next agent inherits the reasoning rather
+                than just the diff.
+              </td>
             </tr>
             <tr>
-              <th scope="row">Context budget cap</th>
-              <td class="ours"><span class="yes">50 KB plus digest</span></td>
-              <td><span class="yes">50 KB per spec</span></td>
-              <td><span class="no">Not addressed</span></td>
-              <td><span class="partial">Steering scope</span></td>
-              <td><span class="partial">Persona scope</span></td>
+              <th scope="row">Cold-start context</th>
+              <td>
+                <code>specocd show</code> prints the whole picture in one read: requirements, task
+                states, who holds what, prior decisions, open blockers and what is free to claim.
+              </td>
+            </tr>
+            <tr>
+              <th scope="row">Context budget</th>
+              <td>
+                A 50 KB cap per artifact, with a digest the agent regenerates when it is exceeded.
+                The CLI never calls a model itself, so it needs no API key and no external service.
+              </td>
+            </tr>
+            <tr>
+              <th scope="row">Verification</th>
+              <td>
+                Requirements are WHEN/THEN. <code>specocd verify</code> runs the structural checks
+                and hands semantic verification to the agent, which must check the real code. It
+                exits non-zero when blocked, so it works as a CI gate.
+              </td>
+            </tr>
+            <tr>
+              <th scope="row">Branching and shipping</th>
+              <td>
+                Single or multi branch, <code>feature/</code> and <code>fix/</code> naming from the
+                ticket type, a human approval gate before any commit, then push, pull request or
+                merge, and the ticket last.
+              </td>
+            </tr>
+            <tr>
+              <th scope="row">Isolated worktrees</th>
+              <td>
+                Each task can take its own checkout on its own branch, so agents on different tasks
+                do not share a working tree. They all read one claim registry.
+              </td>
+            </tr>
+            <tr>
+              <th scope="row">JIRA</th>
+              <td>
+                Start a change from a ticket, hand a verification summary back, move it to QC. Any
+                write failure produces a paste-ready file rather than stranding finished work.
+              </td>
             </tr>
             <tr>
               <th scope="row">Drops into an existing repo</th>
-              <td class="ours"><span class="yes">Yes</span></td>
-              <td><span class="yes">Yes</span></td>
-              <td><span class="partial">Greenfield-leaning</span></td>
-              <td><span class="partial">Partial</span></td>
-              <td><span class="partial">Partial</span></td>
+              <td>
+                <code>specocd init</code> creates <code>.specocd/</code> and writes agent bindings
+                without modifying a single existing file. No restructuring, and no assumption about
+                your language or build system.
+              </td>
             </tr>
             <tr>
-              <th scope="row">Works with any AI tool</th>
-              <td class="ours"><span class="yes">4 agents</span></td>
-              <td><span class="yes">20+ agents</span></td>
-              <td><span class="yes">30+ agents</span></td>
-              <td><span class="no">Its own IDE</span></td>
-              <td><span class="yes">Tool-agnostic</span></td>
-            </tr>
-            <tr>
-              <th scope="row">Branch, approval gate and pull request</th>
-              <td class="ours"><span class="yes">Built in</span></td>
-              <td><span class="no">None</span></td>
-              <td><span class="no">None</span></td>
-              <td><span class="no">None</span></td>
-              <td><span class="no">None</span></td>
-            </tr>
-            <tr>
-              <th scope="row">JIRA ticket to QC loop</th>
-              <td class="ours"><span class="yes">Built in</span></td>
-              <td><span class="no">None</span></td>
-              <td><span class="partial">Via extension</span></td>
-              <td><span class="no">None</span></td>
-              <td><span class="no">None</span></td>
-            </tr>
-            <tr>
-              <th scope="row">Ceremony</th>
-              <td class="ours"><span class="yes">Proportional</span></td>
-              <td>Low</td>
-              <td>High</td>
-              <td>Medium</td>
-              <td>High</td>
+              <th scope="row">Proportional ceremony</th>
+              <td>
+                A one-line fix does not need a PRD. Actions are invokable in any order and any
+                subset, rather than behind fixed phase gates.
+              </td>
             </tr>
           </tbody>
         </table>
       </div>
-      <p class="footnote">
-        Based on public documentation and community reports, September 2026. OpenSpec is the closest
-        prior art. Its git-worktree isolation and cross-repo Stores are documented as beta.
-        spec-kit's constitution step is genuinely stronger governance than anything here; it is also
-        the framework most often reported as heavy for small changes.
-      </p>
     </div>
   </section>
 
