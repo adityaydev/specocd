@@ -183,36 +183,28 @@
 
 <!--
   The mark: a spec sheet whose requirements are checked off, with a code glyph
-  overlapping it. Document and requirement lines take the ink token; the checks
-  and the code glyph take the accent, so both themes resolve from the palette.
+  overlapping it. Monochrome, drawn entirely in currentColor, so it inherits the
+  ink token and reads black on the light ground and white on the dark one.
   Defined once and referenced wherever the wordmark appears.
 -->
 <svg width="0" height="0" style="position: absolute" aria-hidden="true" focusable="false">
   <symbol id="specocd-mark" viewBox="0 0 48 48">
-    <g fill="none" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round">
+    <g fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round">
       <!-- sheet, left open at the bottom right where the code glyph sits over it -->
-      <g stroke="currentColor">
-        <path d="M27 4.5H11a6 6 0 0 0-6 6v26.5a6 6 0 0 0 6 6h11" />
-        <path d="M27 4.5 35 12.5V25" />
-        <path d="M27 4.5v6a2 2 0 0 0 2 2H35" />
-      </g>
+      <path d="M27 4.5H11a6 6 0 0 0-6 6v26.5a6 6 0 0 0 6 6h11" />
+      <path d="M27 4.5 35 12.5V25" />
+      <path d="M27 4.5v6a2 2 0 0 0 2 2H35" />
       <!-- checked requirements -->
-      <g stroke="var(--accent)">
-        <path d="m10.6 17.4 2.1 2.1 4-4.4" />
-        <path d="m10.6 25.9 2.1 2.1 4-4.4" />
-        <path d="m10.6 34.4 2.1 2.1 4-4.4" />
-      </g>
-      <g stroke="currentColor">
-        <path d="M21.6 17.5h8" />
-        <path d="M21.6 26h8" />
-        <path d="M21.6 34.5h3.4" />
-      </g>
+      <path d="m10.6 17.4 2.1 2.1 4-4.4" />
+      <path d="m10.6 25.9 2.1 2.1 4-4.4" />
+      <path d="m10.6 34.4 2.1 2.1 4-4.4" />
+      <path d="M21.6 17.5h8" />
+      <path d="M21.6 26h8" />
+      <path d="M21.6 34.5h3.4" />
       <!-- code glyph, protruding past the sheet's bottom-right -->
-      <g stroke="var(--accent)">
-        <path d="m31.8 31.8-3.8 5.3 3.8 5.3" />
-        <path d="M38.8 30.2 35.6 44" />
-        <path d="m42.4 31.8 3.7 5.3-3.7 5.3" />
-      </g>
+      <path d="m31.8 31.8-3.8 5.3 3.8 5.3" />
+      <path d="M38.8 30.2 35.6 44" />
+      <path d="m42.4 31.8 3.7 5.3-3.7 5.3" />
     </g>
   </symbol>
 </svg>
