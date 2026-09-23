@@ -294,8 +294,8 @@ h3 {
 /* Scales with the wordmark it sits beside, so nav and footer stay in proportion.
    Larger than a plain glyph would need: the sheet carries three rows of detail. */
 .mark {
-  width: 1.95em;
-  height: 1.95em;
+  width: 1.6em;
+  height: 1.6em;
   flex: none;
 }
 
