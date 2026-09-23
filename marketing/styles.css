@@ -207,7 +207,7 @@ h3 {
   align-items: center;
   justify-content: space-between;
   gap: 20px;
-  height: 58px;
+  height: 66px;
 }
 
 .nav-brand {
@@ -230,10 +230,10 @@ h3 {
 .brand {
   display: inline-flex;
   align-items: center;
-  gap: 9px;
-  font-size: 0.9375rem;
-  font-weight: 600;
-  letter-spacing: -0.01em;
+  gap: 10px;
+  font-size: 1.1875rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
   color: var(--ink);
 }
 
@@ -244,8 +244,8 @@ h3 {
 /* Scales with the wordmark it sits beside, so nav and footer stay in proportion.
    Larger than a plain glyph would need: the sheet carries three rows of detail. */
 .mark {
-  width: 1.75em;
-  height: 1.75em;
+  width: 1.95em;
+  height: 1.95em;
   flex: none;
 }
 
