@@ -28,6 +28,24 @@ SpecOCD adds three things:
   by task. When an agent claims a task, prior decisions for it are printed automatically,
   so the next agent inherits the reasoning rather than only the diff.
 
+## Branching and shipping
+
+- **Branch naming.** `feature/{TICKET-ID}-{kebab-desc}` for features,
+  `fix/{TICKET-ID}-{kebab-desc}` for bug fixes. The prefix comes from the JIRA issue
+  type. Ticket keys stay upper case so Atlassian and CI can link the branch to the
+  ticket. Task worktrees append `-{task}`: `fix/PROJ-51-session-leak-t1`.
+- **Single or multi branch.** `specocd init --mode single|multi`, changed later with
+  `specocd config set git.mode`. Multi is the default.
+- **A human gate before anything leaves the machine.** Agents implement and verify, then
+  stop. `specocd approve` re-runs verification and only then commits. `specocd ship`
+  refuses on any change that has not been approved. Agents are instructed never to run
+  either command.
+- **Ship order.** Push, then pull request or merge, then the ticket — last, so a ticket
+  is never told work is ready that never left the machine. A failure leaves the ticket
+  untouched, writes `ship-manual.md` with what remains and what already succeeded, and
+  exits 4.
+- SpecOCD never force-pushes, and never rebases.
+
 ## Key facts
 
 - Works in new or existing repositories, any language or framework. `specocd init`
@@ -41,7 +59,7 @@ SpecOCD adds three things:
   structural checks then hands semantic verification to the agent, which must check the
   real code. It exits non-zero when blocked, so it works as a CI gate.
 - Exit codes: 0 success, 1 blocked or usage error, 2 claim conflict, 3 JIRA handoff
-  incomplete.
+  incomplete, 4 ship incomplete.
 - Optional JIRA integration reads ticket title, description, comments, due date and
   attachments, and posts a verification summary back before moving the ticket to QC.
   If a write fails it produces a paste-ready `jira-handoff.md` and exits 3, listing what
@@ -69,5 +87,9 @@ SpecOCD adds three things:
     specocd status [change]           active claims, stale claims, cap breaches
     specocd verify <change>           structural checks before archiving
     specocd archive <change>          fold into the baseline spec and freeze
+    specocd branch <change>           put the tree on the change's branch
+    specocd approve <change>          developer sign-off, then commit
+    specocd ship <change>             push, pull request or merge, update the ticket
+    specocd config set <key> <value>  change a setting, e.g. git.mode
     specocd jira start <KEY>          scaffold a change from a JIRA ticket
     specocd jira handoff --change <c> comment on the ticket and move it to QC

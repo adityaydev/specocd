@@ -66,6 +66,9 @@
         "Heartbeat-based recovery of stale claims",
         "Append-only decision log replayed to the next agent",
         "WHEN/THEN acceptance criteria and verification",
+        "Branch per change with feature/ and fix/ naming from the ticket type",
+        "Human approval gate before any commit, push or merge",
+        "Push, pull request or merge, then ticket update, in that order",
         "Bindings for Claude Code, Cursor, GitHub Copilot and Codex",
         "JIRA ticket to QC workflow with manual fallback"
       ],
@@ -120,6 +123,30 @@
           "acceptedAnswer": {
             "@type": "Answer",
             "text": "No. The command line tool never calls a language model itself, so it needs no API key and no external service. When a spec exceeds its size cap, it prints an instruction for whichever agent is already running to regenerate the digest. The only optional network calls are to your own JIRA instance."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What is SpecOCD's branching strategy?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Multi-branch mode gives each change its own branch, named feature/TICKET-ID-description or fix/TICKET-ID-description depending on the JIRA issue type. Single-branch mode stays on the current branch instead. Choose with specocd init --mode single or multi, and change it later with specocd config set git.mode. Ticket keys keep their upper case so Atlassian and CI can link the branch to its ticket."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does SpecOCD let an AI agent commit or push code on its own?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. Agents implement and verify, then stop. Committing happens only when a developer runs specocd approve, which re-runs verification first. specocd ship, which pushes and opens a pull request or merges, refuses outright on a change that has not been approved. The agent instructions SpecOCD generates tell agents never to run either command themselves."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What order does SpecOCD push, merge and update the ticket in?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "specocd ship pushes the branch, then opens a pull request or merges into the base branch, and updates the JIRA ticket last. That order means a ticket is never told work is ready that never left the machine. If any step fails the ticket is left untouched, a ship-manual.md file records what remains and what already succeeded, and the command exits with code 4."
           }
         },
         {
@@ -196,6 +223,7 @@
     <nav class="nav-links" aria-label="Sections">
       <a href="#problem">Problem</a>
       <a href="#how">How it works</a>
+      <a href="#git">Git</a>
       <a href="#compare">Compare</a>
       <a href="#jira">JIRA</a>
       <a class="nav-cta" href="#start">Get started</a>
@@ -368,6 +396,102 @@ rate-limiting
     </div>
   </section>
 
+  <section id="git">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Git</p>
+        <h2>Nothing ships without a human.</h2>
+        <p class="lead">
+          Agents branch, implement and verify. Then they stop. A developer approves, and only that
+          approval lets anything reach a commit, a remote or a ticket.
+        </p>
+      </div>
+
+      <div class="terminal">
+        <div class="terminal-bar">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          <span class="terminal-title">the gate</span>
+        </div>
+        <div class="terminal-body">
+<pre><span class="c-dim"># the agent has implemented and verified, then stopped</span>
+<span class="c-prompt">$</span> specocd ship PROJ-42-login-timeout
+<span class="c-red">"PROJ-42-login-timeout" has not been approved. Shipping pushes</span>
+<span class="c-red">code and opens a pull request or merges, so it requires a human</span>
+<span class="c-red">sign-off first: run `specocd approve PROJ-42-login-timeout`.</span>
+
+<span class="c-dim"># the developer reviews, then signs off</span>
+<span class="c-prompt">$</span> specocd approve PROJ-42-login-timeout
+Approved and committed a3f91c2 on fix/PROJ-42-login-timeout.
+
+<span class="c-prompt">$</span> specocd ship PROJ-42-login-timeout
+<span class="c-green">ok</span>    push           fix/PROJ-42-login-timeout → origin
+<span class="c-green">ok</span>    pull request   https://github.com/acme/api/pull/418
+<span class="c-green">ok</span>    jira           commented and moved to QA<span class="cursor">▌</span></pre>
+        </div>
+      </div>
+      <p class="caption">
+        The ticket is updated last, so it is never told work is ready that never left the machine.
+        If a step fails, the ticket is not touched and a paste-ready file records what remains.
+      </p>
+
+      <div class="split" style="margin-top: 56px">
+        <div>
+          <h3 style="margin-bottom: 14px">Branch naming</h3>
+          <div class="table-scroll compact">
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">Kind</th>
+                  <th scope="col">Branch</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><th scope="row">Feature</th><td>feature/PROJ-42-login-timeout</td></tr>
+                <tr><th scope="row">Bug fix</th><td>fix/PROJ-51-session-leak</td></tr>
+                <tr><th scope="row">No ticket</th><td>feature/rate-limiting</td></tr>
+                <tr><th scope="row">Task worktree</th><td>fix/PROJ-51-session-leak-t1</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="caption" style="margin-top: 16px">
+            The prefix comes from the JIRA issue type, so bugs land on <code>fix/</code> without
+            anyone choosing. Ticket keys keep their upper case, because that is what Atlassian and
+            CI match on to link a branch back to its ticket.
+          </p>
+        </div>
+
+        <div class="steps" style="grid-template-columns: 1fr">
+          <div class="step">
+            <code>single or multi</code>
+            <h3>Branch per change, or stay put</h3>
+            <p>
+              <code style="background: none; padding: 0">specocd init --mode single</code> keeps you
+              on your current branch; multi gives each change its own. Switch any time with
+              <code style="background: none; padding: 0">specocd config set git.mode</code>.
+            </p>
+          </div>
+          <div class="step">
+            <code>worktrees</code>
+            <h3>An isolated checkout per task</h3>
+            <p>
+              Claims stop two agents taking one task. Worktrees stop agents on different tasks
+              colliding on one filesystem — each gets its own branch and directory, sharing a single
+              claim registry.
+            </p>
+          </div>
+          <div class="step">
+            <code>provenance</code>
+            <h3>Every task carries its commits</h3>
+            <p>
+              Claiming records the branch and HEAD, releasing records HEAD again, so a decision in
+              the log always has the commit range that acted on it.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section id="compare">
     <div class="wrap">
       <div class="section-head">
@@ -439,6 +563,14 @@ rate-limiting
               <td><span class="yes">30+ agents</span></td>
               <td><span class="no">Its own IDE</span></td>
               <td><span class="yes">Tool-agnostic</span></td>
+            </tr>
+            <tr>
+              <th scope="row">Branch, approval gate and pull request</th>
+              <td class="ours"><span class="yes">Built in</span></td>
+              <td><span class="no">None</span></td>
+              <td><span class="no">None</span></td>
+              <td><span class="no">None</span></td>
+              <td><span class="no">None</span></td>
             </tr>
             <tr>
               <th scope="row">JIRA ticket to QC loop</th>
@@ -584,6 +716,33 @@ rate-limiting
           </p>
         </div>
         <div class="qa">
+          <h3>What is the branching strategy?</h3>
+          <p>
+            Multi-branch mode gives each change its own branch, named
+            <code>feature/PROJ-42-description</code> or <code>fix/PROJ-51-description</code>
+            depending on the JIRA issue type. Single-branch mode stays where you are. Pick with
+            <code>specocd init --mode</code>, change it later with
+            <code>specocd config set git.mode</code>.
+          </p>
+        </div>
+        <div class="qa">
+          <h3>Can an agent commit or push on its own?</h3>
+          <p>
+            No. Agents implement and verify, then stop. Committing happens only when a developer
+            runs <code>specocd approve</code>, which re-runs verification first.
+            <code>specocd ship</code> refuses outright on a change nobody approved, and the
+            generated agent instructions tell agents never to run either command.
+          </p>
+        </div>
+        <div class="qa">
+          <h3>What order does it push, merge and update the ticket?</h3>
+          <p>
+            Push, then pull request or merge, then the ticket — last. So a ticket is never told
+            work is ready that never left the machine. If a step fails the ticket is untouched, a
+            <code>ship-manual.md</code> records what remains, and it exits <code>4</code>.
+          </p>
+        </div>
+        <div class="qa">
           <h3>Can it work from JIRA tickets?</h3>
           <p>
             Yes. Add a JIRA API token to a gitignored credentials file, then
@@ -627,6 +786,8 @@ rate-limiting
         <div class="cmd"><code>specocd claim &lt;change&gt; T1</code><span>Take a task, see prior decisions</span></div>
         <div class="cmd"><code>specocd log &lt;change&gt; --task T1</code><span>Record a decision or blocker</span></div>
         <div class="cmd"><code>specocd verify &lt;change&gt;</code><span>Check before archiving</span></div>
+        <div class="cmd"><code>specocd approve &lt;change&gt;</code><span>Developer sign-off, then commit</span></div>
+        <div class="cmd"><code>specocd ship &lt;change&gt;</code><span>Push, pull request, update the ticket</span></div>
         <div class="cmd"><code>specocd archive &lt;change&gt;</code><span>Fold into the baseline spec</span></div>
       </div>
     </div>
@@ -646,6 +807,7 @@ rate-limiting
       <nav class="foot-links">
         <a href="#problem">Problem</a>
         <a href="#how">How it works</a>
+        <a href="#git">Git</a>
         <a href="#compare">Compare</a>
         <a href="#jira">JIRA</a>
         <a href="#start">Get started</a>

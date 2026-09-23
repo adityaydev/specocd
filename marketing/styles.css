@@ -492,7 +492,8 @@ h3 {
   white-space: pre;
 }
 
-.c-prompt {
+.c-prompt,
+.c-green {
   color: var(--term-green);
 }
 .c-dim {
@@ -598,6 +599,17 @@ table {
   border-collapse: collapse;
   font-size: 0.875rem;
   min-width: 720px;
+}
+
+/* Small tables sitting in a column, which the comparison table's width would clip. */
+.table-scroll.compact table {
+  min-width: 0;
+}
+
+.table-scroll.compact td {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--ink);
 }
 
 th,
