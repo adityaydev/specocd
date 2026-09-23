@@ -77,10 +77,14 @@ export function renderContext(ctx: ChangeContext): string {
     "",
     `status: ${ctx.status}${ctx.approved ? " (approved)" : ""} · feature: ${ctx.feature}` +
       (ctx.jira ? ` · JIRA: ${ctx.jira}` : ""),
+    // A repository with an unborn HEAD has no branch and no sha, which would
+    // otherwise render as "detached at null" on someone's very first run.
     ...(ctx.repo.isRepo
       ? [
-          `git: ${ctx.repo.branch ?? "detached"} at ${shortSha(ctx.repo.sha)}` +
-            (ctx.repo.dirty ? " (uncommitted changes)" : " (clean)"),
+          ctx.repo.sha === null
+            ? "git: no commits yet"
+            : `git: ${ctx.repo.branch ?? "detached"} at ${shortSha(ctx.repo.sha)}` +
+              (ctx.repo.dirty ? " (uncommitted changes)" : " (clean)"),
         ]
       : []),
     "",

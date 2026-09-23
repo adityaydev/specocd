@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -102,5 +103,19 @@ describe("show", () => {
     const { change } = propose(root, "bare");
     const text = renderContext(show(root, change));
     assert.match(text, /## Requirements/);
+  });
+});
+
+describe("show in a repository with no commits", () => {
+  test("says so rather than rendering 'detached at null'", () => {
+    const root = mkdtempSync(path.join(tmpdir(), "specocd-unborn-"));
+    roots.push(root);
+    execFileSync("git", ["init", "-q"], { cwd: root, stdio: "ignore" });
+    init(root);
+    const { change } = propose(root, "first change");
+
+    const text = renderContext(show(root, change));
+    assert.match(text, /git: no commits yet/);
+    assert.ok(!/null/.test(text), "an unborn HEAD must not leak a null into the output");
   });
 });
