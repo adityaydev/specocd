@@ -73,7 +73,26 @@ records provenance and can give each agent its own checkout.
 
 ## Branching strategy
 
-Configured under `git:` in `.specocd/config.yaml`:
+Pick single or multi-branch at init:
+
+```bash
+specocd init --mode multi     # default: a branch per change
+specocd init --mode single    # stay on whatever branch you are on
+```
+
+Change it later, and see every setting, without opening a file:
+
+```bash
+specocd config                              # list everything, flagging bad values
+specocd config get git.mode
+specocd config set git.mode single
+```
+
+`config set` rejects a value outside the allowed set rather than accepting it, so a typo
+like `mutli` cannot silently leave you on the wrong mode. Running `specocd config` also
+flags anything invalid that was hand-edited into the file.
+
+Full settings, in `.specocd/config.yaml`:
 
 ```yaml
 git:
@@ -166,7 +185,8 @@ itself — no API keys, no external service.
 
 | Command | Purpose |
 |---|---|
-| `specocd init` | Scaffold `.specocd/`, detect agent tooling, generate bindings |
+| `specocd init [--mode single\|multi]` | Scaffold `.specocd/`, detect agent tooling, generate bindings |
+| `specocd config [get\|set]` | List, read or change settings |
 | `specocd propose <name> [--design] [--fix]` | Create a change; `--fix` makes it a bug fix |
 | `specocd claim <change> <task-id>` | Claim a task (conflicts on a live claim) |
 | `specocd release <change> <task-id> [--status ...]` | End a claim: completed / released / abandoned |

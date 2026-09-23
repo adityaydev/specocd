@@ -22,6 +22,7 @@ import {
 } from "./commands/jira.js";
 import { CREDENTIALS_IGNORE_ENTRY } from "./credentials.js";
 import { renderTicket } from "./integrations/jira/format.js";
+import { getSetting, listSettings, setSetting } from "./commands/config.js";
 import { init } from "./commands/init.js";
 import { renderContext, show } from "./commands/show.js";
 import { ship } from "./commands/ship.js";
@@ -49,16 +50,63 @@ function reportOversized(root: string, change: string): void {
 
 program
   .command("init")
+  .option("--mode <mode>", "branching: multi (a branch per change) or single", "multi")
   .description("Scaffold .specocd/ and generate agent bindings")
-  .action(() => {
+  .action((opts: { mode: string }) => {
     const root = process.cwd();
-    const result = init(root);
+    if (!["single", "multi"].includes(opts.mode)) {
+      throw new Error(`--mode must be "single" or "multi", not "${opts.mode}".`);
+    }
+    const result = init(root, { mode: opts.mode as "single" | "multi" });
     console.log(result.alreadyInitialized ? "Refreshed .specocd/" : `Initialized .specocd/ in ${root}`);
     console.log(
       result.bindings.length > 0
         ? `Bindings: ${result.bindings.join(", ")}\n  ${result.bindingFiles.join("\n  ")}`
         : "No agent tooling detected — bindings skipped (run `specocd bindings sync` later).",
     );
+    if (!result.alreadyInitialized) {
+      console.log(
+        `Branching: ${opts.mode}. Change it any time with \`specocd config set git.mode <single|multi>\`.`,
+      );
+    }
+  });
+
+const configCmd = program
+  .command("config")
+  .description("Read and change project settings")
+  .action(() => {
+    const root = requireRoot();
+    const settings = listSettings(root);
+    const width = Math.max(...settings.map((s) => s.key.length));
+    for (const s of settings) {
+      const value = s.problem ? `${JSON.stringify(s.value)}  <-- ${s.problem}` : JSON.stringify(s.value);
+      console.log(`${s.key.padEnd(width)}  ${value}`);
+    }
+    if (settings.some((s) => s.problem)) {
+      console.error("\nSome values are not valid and will fall back to defaults. Fix them with `specocd config set`.");
+      process.exit(1);
+    }
+    console.log(`\nChange one with: specocd config set <key> <value>`);
+  });
+
+configCmd
+  .command("get")
+  .argument("<key>")
+  .description("Print one setting")
+  .action((key: string) => {
+    const value = getSetting(requireRoot(), key);
+    console.log(typeof value === "string" ? value : JSON.stringify(value));
+  });
+
+configCmd
+  .command("set")
+  .argument("<key>")
+  .argument("<value>")
+  .description("Change one setting")
+  .action((key: string, value: string) => {
+    const root = requireRoot();
+    const applied = setSetting(root, key, value);
+    console.log(`${key} = ${JSON.stringify(applied)}`);
   });
 
 program
