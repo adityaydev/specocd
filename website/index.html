@@ -322,8 +322,8 @@
     <nav class="nav-links" aria-label="Sections">
       <a href="#problem">Problem</a>
       <a href="#how">How it works</a>
-      <a href="#git">Git</a>
       <a href="#features">Features</a>
+      <a href="#git">Git</a>
       <a href="#jira">JIRA</a>
       <a class="nav-cta" href="#start">Get started</a>
     </nav>
@@ -496,7 +496,88 @@ rate-limiting
     </div>
   </section>
 
-  <section id="git">
+  <section id="features">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Features</p>
+        <h2>Built in, not left to convention.</h2>
+        <p class="lead">
+          Everything below is one command in a repository you already have. The right-hand column
+          is what you are otherwise left to arrange yourself.
+        </p>
+      </div>
+
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">Capability</th>
+              <th scope="col" class="ours">SpecOCD</th>
+              <th scope="col">Others</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">Task claims with conflict detection</th>
+              <td class="ours"><span class="yes">Built in</span></td>
+              <td><span class="no">Not offered</span></td>
+            </tr>
+            <tr>
+              <th scope="row">Stale-session recovery</th>
+              <td class="ours"><span class="yes">Heartbeat and takeover</span></td>
+              <td><span class="no">Not offered</span></td>
+            </tr>
+            <tr>
+              <th scope="row">Prior decisions replayed on pickup</th>
+              <td class="ours"><span class="yes">Automatic, on claim</span></td>
+              <td><span class="partial">Document handoff at best</span></td>
+            </tr>
+            <tr>
+              <th scope="row">Isolated worktree per task</th>
+              <td class="ours"><span class="yes">One shared claim registry</span></td>
+              <td><span class="partial">Sometimes, without shared claims</span></td>
+            </tr>
+            <tr>
+              <th scope="row">Human approval gate before commit</th>
+              <td class="ours"><span class="yes">Required by default</span></td>
+              <td><span class="no">Not offered</span></td>
+            </tr>
+            <tr>
+              <th scope="row">Branch, pull request and ticket in one step</th>
+              <td class="ours"><span class="yes">Built in</span></td>
+              <td><span class="no">Not offered</span></td>
+            </tr>
+            <tr>
+              <th scope="row">Ticket to QC loop</th>
+              <td class="ours"><span class="yes">Built in, degrades to a paste-ready file</span></td>
+              <td><span class="partial">Via an extension, if at all</span></td>
+            </tr>
+            <tr>
+              <th scope="row">Context budget cap</th>
+              <td class="ours"><span class="yes">50 KB plus an agent-written digest</span></td>
+              <td><span class="partial">Varies; some cap specs, some do not</span></td>
+            </tr>
+            <tr>
+              <th scope="row">Drops into an existing repo</th>
+              <td class="ours"><span class="yes">No files touched</span></td>
+              <td><span class="partial">Varies; several lean greenfield</span></td>
+            </tr>
+            <tr>
+              <th scope="row">Ceremony</th>
+              <td class="ours"><span class="yes">Proportional to the change</span></td>
+              <td><span class="partial">Often fixed phases</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="footnote">
+        "Others" describes comparable spec-driven development frameworks as their public
+        documentation stood in September 2026. They are good at things this table does not
+        measure, and they move quickly, so weigh them on their own terms too.
+      </p>
+    </div>
+  </section>
+  <section class="band" id="git">
     <div class="wrap">
       <div class="section-head">
         <p class="eyebrow">Git</p>
@@ -639,89 +720,8 @@ Approved and committed a3f91c2 on fix/PROJ-42-login-timeout.
     </div>
   </section>
 
-  <section id="features">
-    <div class="wrap">
-      <div class="section-head">
-        <p class="eyebrow">Features</p>
-        <h2>Built in, not left to convention.</h2>
-        <p class="lead">
-          Everything below is one command in a repository you already have. The right-hand column
-          is what you are otherwise left to arrange yourself.
-        </p>
-      </div>
 
-      <div class="table-scroll">
-        <table>
-          <thead>
-            <tr>
-              <th scope="col">Capability</th>
-              <th scope="col" class="ours">SpecOCD</th>
-              <th scope="col">Others</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <th scope="row">Task claims with conflict detection</th>
-              <td class="ours"><span class="yes">Built in</span></td>
-              <td><span class="no">Not offered</span></td>
-            </tr>
-            <tr>
-              <th scope="row">Stale-session recovery</th>
-              <td class="ours"><span class="yes">Heartbeat and takeover</span></td>
-              <td><span class="no">Not offered</span></td>
-            </tr>
-            <tr>
-              <th scope="row">Prior decisions replayed on pickup</th>
-              <td class="ours"><span class="yes">Automatic, on claim</span></td>
-              <td><span class="partial">Document handoff at best</span></td>
-            </tr>
-            <tr>
-              <th scope="row">Isolated worktree per task</th>
-              <td class="ours"><span class="yes">One shared claim registry</span></td>
-              <td><span class="partial">Sometimes, without shared claims</span></td>
-            </tr>
-            <tr>
-              <th scope="row">Human approval gate before commit</th>
-              <td class="ours"><span class="yes">Required by default</span></td>
-              <td><span class="no">Not offered</span></td>
-            </tr>
-            <tr>
-              <th scope="row">Branch, pull request and ticket in one step</th>
-              <td class="ours"><span class="yes">Built in</span></td>
-              <td><span class="no">Not offered</span></td>
-            </tr>
-            <tr>
-              <th scope="row">Ticket to QC loop</th>
-              <td class="ours"><span class="yes">Built in, degrades to a paste-ready file</span></td>
-              <td><span class="partial">Via an extension, if at all</span></td>
-            </tr>
-            <tr>
-              <th scope="row">Context budget cap</th>
-              <td class="ours"><span class="yes">50 KB plus an agent-written digest</span></td>
-              <td><span class="partial">Varies; some cap specs, some do not</span></td>
-            </tr>
-            <tr>
-              <th scope="row">Drops into an existing repo</th>
-              <td class="ours"><span class="yes">No files touched</span></td>
-              <td><span class="partial">Varies; several lean greenfield</span></td>
-            </tr>
-            <tr>
-              <th scope="row">Ceremony</th>
-              <td class="ours"><span class="yes">Proportional to the change</span></td>
-              <td><span class="partial">Often fixed phases</span></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <p class="footnote">
-        "Others" describes comparable spec-driven development frameworks as their public
-        documentation stood in September 2026. They are good at things this table does not
-        measure, and they move quickly, so weigh them on their own terms too.
-      </p>
-    </div>
-  </section>
-
-  <section class="band" id="jira">
+  <section id="jira">
     <div class="wrap">
       <div class="section-head">
         <p class="eyebrow">JIRA</p>
@@ -775,7 +775,7 @@ Approved and committed a3f91c2 on fix/PROJ-42-login-timeout.
     </div>
   </section>
 
-  <section id="faq">
+  <section class="band" id="faq">
     <div class="wrap">
       <div class="section-head">
         <p class="eyebrow">Questions</p>
@@ -895,7 +895,7 @@ Approved and committed a3f91c2 on fix/PROJ-42-login-timeout.
     </div>
   </section>
 
-  <section class="band" id="start">
+  <section id="start">
     <div class="wrap">
       <div class="section-head">
         <p class="eyebrow">Get started</p>
