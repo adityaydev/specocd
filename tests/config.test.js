@@ -106,3 +106,20 @@ describe("config listing", () => {
     assert.match(bad.problem, /single \| multi/);
   });
 });
+
+describe("init --integration", () => {
+  test("defaults to pull requests, the reversible option", () => {
+    assert.equal(loadConfig(project()).git.integration, "pull-request");
+  });
+
+  test("records direct merge when chosen", () => {
+    assert.equal(loadConfig(project({ integration: "merge" })).git.integration, "merge");
+  });
+
+  test("the two modes are mutually exclusive in config", () => {
+    const root = project({ integration: "merge" });
+    setSetting(root, "git.integration", "pull-request");
+    assert.equal(loadConfig(root).git.integration, "pull-request");
+    assert.throws(() => setSetting(root, "git.integration", "both"), InvalidValueError);
+  });
+});

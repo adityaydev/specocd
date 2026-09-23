@@ -466,8 +466,11 @@ Approved and committed a3f91c2 on fix/PROJ-42-login-timeout.
             <h3>Branch per change, or stay put</h3>
             <p>
               <code style="background: none; padding: 0">specocd init --mode single</code> keeps you
-              on your current branch; multi gives each change its own. Switch any time with
-              <code style="background: none; padding: 0">specocd config set git.mode</code>.
+              on your current branch; multi gives each change its own. A project is also in one
+              integration mode or the other:
+              <code style="background: none; padding: 0">--integration pull-request</code> or
+              <code style="background: none; padding: 0">merge</code>, which merges into the base
+              branch and pushes it.
             </p>
           </div>
           <div class="step">

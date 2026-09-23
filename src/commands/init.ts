@@ -25,7 +25,10 @@ export interface InitResult {
   bindingFiles: string[];
 }
 
-export function init(root: string, opts: { mode?: "single" | "multi" } = {}): InitResult {
+export function init(
+  root: string,
+  opts: { mode?: "single" | "multi"; integration?: "pull-request" | "merge" | "none" } = {},
+): InitResult {
   const alreadyInitialized = existsSync(configPath(root));
 
   for (const dir of [specocdPath(root), specsDir(root), changesDir(root), archiveDir(root), bindingsDir(root)]) {
@@ -38,7 +41,11 @@ export function init(root: string, opts: { mode?: "single" | "multi" } = {}): In
     const config: SpecOCDConfig = {
       ...DEFAULT_CONFIG,
       enabled_bindings: bindings,
-      git: { ...DEFAULT_CONFIG.git, ...(opts.mode ? { mode: opts.mode } : {}) },
+      git: {
+        ...DEFAULT_CONFIG.git,
+        ...(opts.mode ? { mode: opts.mode } : {}),
+        ...(opts.integration ? { integration: opts.integration } : {}),
+      },
     };
     saveConfig(root, config);
     writeFileSync(path.join(specocdPath(root), "README.md"), README, "utf8");

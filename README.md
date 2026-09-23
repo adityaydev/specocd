@@ -73,12 +73,22 @@ records provenance and can give each agent its own checkout.
 
 ## Branching strategy
 
-Pick single or multi-branch at init:
+Two decisions, both made at init:
 
 ```bash
+# how branches work
 specocd init --mode multi     # default: a branch per change
 specocd init --mode single    # stay on whatever branch you are on
+
+# how work lands
+specocd init --integration pull-request   # default: open a PR against the base branch
+specocd init --integration merge          # merge into the base branch and push it
 ```
+
+A project is in **one** integration mode or the other. Pull request is the default
+because it is reviewable and revertible; merge is for teams that integrate straight to
+the base branch. (`none` also exists, via `specocd config set git.integration none`, for
+repos that integrate by hand — `ship` then pushes the branch and stops.)
 
 Change it later, and see every setting, without opening a file:
 
@@ -154,7 +164,8 @@ Agents are instructed never to run `approve` or `ship` themselves.
 ### Ship order, and what happens when it breaks
 
 `ship` pushes, then opens a pull request or merges, and updates the JIRA ticket **last** —
-so the ticket is never told work is ready that never left the machine. If a step fails,
+so the ticket is never told work is ready that never left the machine. In merge mode the
+base branch is pushed too, since a merge that only lands locally has shipped nothing. If a step fails,
 the ticket is not updated, a `ship-manual.md` is written listing what remains and what
 already succeeded, and the command exits `4`.
 
@@ -185,7 +196,7 @@ itself — no API keys, no external service.
 
 | Command | Purpose |
 |---|---|
-| `specocd init [--mode single\|multi]` | Scaffold `.specocd/`, detect agent tooling, generate bindings |
+| `specocd init [--mode single\|multi] [--integration pull-request\|merge]` | Scaffold `.specocd/`, detect agent tooling, generate bindings |
 | `specocd config [get\|set]` | List, read or change settings |
 | `specocd propose <name> [--design] [--fix]` | Create a change; `--fix` makes it a bug fix |
 | `specocd claim <change> <task-id>` | Claim a task (conflicts on a live claim) |

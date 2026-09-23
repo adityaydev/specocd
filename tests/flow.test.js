@@ -189,6 +189,26 @@ describe("ship", () => {
     assert.match(remote, /feature\/rate-limiting/);
   });
 
+  /**
+   * A merge that only lands locally has shipped nothing, and the ticket would still be
+   * moved to QA on work no one else can see.
+   */
+  test("merge mode pushes the base branch, not just the local one", async () => {
+    const root = project({ config: { integration: "merge" } });
+    const change = ready(root);
+    useBranch(root, change);
+    approve(root, change);
+
+    const result = await ship(root, change);
+    assert.equal(result.merged, true);
+    assert.ok(result.steps.every((s) => s.ok), JSON.stringify(result.steps));
+    assert.match(
+      execFileSync("git", ["show", "origin/main:mw.js"], { cwd: root, encoding: "utf8" }),
+      /middleware/,
+      "the base branch must reach the remote",
+    );
+  });
+
   test("merge mode integrates into the base branch", async () => {
     const root = project({ config: { integration: "merge" } });
     const change = ready(root);

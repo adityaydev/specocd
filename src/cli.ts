@@ -51,13 +51,23 @@ function reportOversized(root: string, change: string): void {
 program
   .command("init")
   .option("--mode <mode>", "branching: multi (a branch per change) or single", "multi")
+  .option("--integration <how>", "how work lands: pull-request or merge", "pull-request")
   .description("Scaffold .specocd/ and generate agent bindings")
-  .action((opts: { mode: string }) => {
+  .action((opts: { mode: string; integration: string }) => {
     const root = process.cwd();
     if (!["single", "multi"].includes(opts.mode)) {
       throw new Error(`--mode must be "single" or "multi", not "${opts.mode}".`);
     }
-    const result = init(root, { mode: opts.mode as "single" | "multi" });
+    if (!["pull-request", "merge", "none"].includes(opts.integration)) {
+      throw new Error(
+        `--integration must be "pull-request" or "merge", not "${opts.integration}". ` +
+          `("none" is available via \`specocd config set git.integration none\` for repos that integrate by hand.)`,
+      );
+    }
+    const result = init(root, {
+      mode: opts.mode as "single" | "multi",
+      integration: opts.integration as "pull-request" | "merge" | "none",
+    });
     console.log(result.alreadyInitialized ? "Refreshed .specocd/" : `Initialized .specocd/ in ${root}`);
     console.log(
       result.bindings.length > 0
@@ -65,9 +75,12 @@ program
         : "No agent tooling detected — bindings skipped (run `specocd bindings sync` later).",
     );
     if (!result.alreadyInitialized) {
+      console.log(`\nBranching:   ${opts.mode}`);
       console.log(
-        `Branching: ${opts.mode}. Change it any time with \`specocd config set git.mode <single|multi>\`.`,
+        `Integration: ${opts.integration}` +
+          (opts.integration === "merge" ? " (ship merges into the base branch and pushes it)" : ""),
       );
+      console.log("Change either with `specocd config set git.mode|git.integration <value>`.");
     }
   });
 

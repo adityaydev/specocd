@@ -167,6 +167,21 @@ export async function ship(
       } catch (error) {
         steps.push({ name: "merge", ok: false, detail: (error as Error).message });
       }
+
+      // A merge that stays local has not shipped anything: the base branch has to
+      // reach the remote, or the ticket would be moved on work nobody else can see.
+      if (merged && config.git.push) {
+        if (!hasRemote(root, remote)) {
+          steps.push({ name: "push base", ok: true, detail: `no remote; ${base} updated locally only` });
+        } else {
+          try {
+            push(root, remote, base);
+            steps.push({ name: "push base", ok: true, detail: `${base} → ${remote}` });
+          } catch (error) {
+            steps.push({ name: "push base", ok: false, detail: (error as Error).message });
+          }
+        }
+      }
     }
   }
 
