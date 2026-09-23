@@ -1,5 +1,6 @@
 import { existsSync } from "node:fs";
 import path from "node:path";
+import { mainWorktreeRoot } from "./core/git.js";
 
 export const SPECOCD_DIR = ".specocd";
 
@@ -9,8 +10,18 @@ export class SpecOCDNotInitializedError extends Error {
   }
 }
 
-/** Walks up from `start` looking for a .specocd/ directory. */
+/**
+ * Locates the project whose coordination state applies here.
+ *
+ * Inside a linked git worktree this deliberately resolves to the MAIN checkout. A
+ * worktree carries its own committed copy of .specocd/, and honouring that copy would
+ * hand each agent a private claim registry — exactly the collision the framework
+ * exists to prevent.
+ */
 export function findRoot(start: string = process.cwd()): string | null {
+  const main = mainWorktreeRoot(start);
+  if (main && existsSync(path.join(main, SPECOCD_DIR))) return main;
+
   let dir = path.resolve(start);
   while (true) {
     if (existsSync(path.join(dir, SPECOCD_DIR))) return dir;

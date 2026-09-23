@@ -22,6 +22,24 @@ export function isRepo(root: string): boolean {
   return git(root, ["rev-parse", "--is-inside-work-tree"]) === "true";
 }
 
+/**
+ * The main checkout of a repository, from anywhere inside it. A linked worktree has
+ * its own .git pointer but shares the common dir, so its parent is the main root.
+ * Coordination state lives there and nowhere else: every worktree checks out its own
+ * copy of .specocd/, and agents writing to those copies would each hold a private
+ * view of who claimed what.
+ */
+export function mainWorktreeRoot(start: string): string | null {
+  let common = git(start, ["rev-parse", "--path-format=absolute", "--git-common-dir"]);
+  if (!common) {
+    // --path-format predates git 2.31; fall back to resolving the relative form.
+    const relative = git(start, ["rev-parse", "--git-common-dir"]);
+    if (!relative) return null;
+    common = path.resolve(start, relative);
+  }
+  return path.basename(common) === ".git" ? path.dirname(common) : null;
+}
+
 export function currentBranch(root: string): string | null {
   const branch = git(root, ["rev-parse", "--abbrev-ref", "HEAD"]);
   return branch === "HEAD" ? null : branch; // detached

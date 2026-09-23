@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import { existsSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import test, { after, describe } from "node:test";
@@ -16,6 +16,8 @@ import {
   shortSha,
   taskBranch,
 } from "../dist/core/git.js";
+import { appendEvent, readEvents } from "../dist/core/events.js";
+import { findRoot } from "../dist/paths.js";
 import { init } from "../dist/commands/init.js";
 import { propose } from "../dist/commands/propose.js";
 import { show } from "../dist/commands/show.js";
@@ -190,6 +192,41 @@ describe("worktrees", () => {
     const { change } = propose(root, "no git");
     assert.throws(() => createWorktree(root, change, "T1"), NotARepoError);
     assert.deepEqual(listTaskWorktrees(root, [change]), []);
+  });
+
+  /**
+   * A worktree checks out its own copy of .specocd/. If commands run from inside it
+   * used that copy, every agent would hold a private claim registry and the whole
+   * coordination guarantee would silently evaporate.
+   */
+  test("coordination state resolves to the main checkout, not the worktree's copy", () => {
+    const root = repo();
+    const { change } = propose(root, "feature x");
+    run(root, ["add", "-A"]);
+    run(root, ["commit", "-qm", "add change"]);
+
+    updateClaims(root, change, (d) => claimTask(d, "T1", "claude-code", "A", 60));
+    const { path: wt } = createWorktree(root, change, "T1");
+
+    assert.ok(existsSync(path.join(wt, ".specocd")), "the worktree does carry its own copy");
+    assert.equal(
+      realpathSync(findRoot(wt)),
+      realpathSync(root),
+      "commands run inside the worktree must use the main repo's state",
+    );
+
+    // A decision logged from the worktree has to be visible in the main repo.
+    appendEvent(findRoot(wt), change, {
+      task_id: "T1", agent: "claude-code", session_id: "A",
+      type: "decision", message: "from the worktree",
+    });
+    assert.ok(readEvents(root, change).some((e) => e.message === "from the worktree"));
+
+    // And the claim held from the worktree must still block another agent.
+    assert.throws(
+      () => updateClaims(root, change, (d) => claimTask(d, "T1", "cursor", "B", 60)),
+      /already claimed/,
+    );
   });
 
   test("places worktrees beside the repo, never inside it", () => {
