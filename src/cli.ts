@@ -3,7 +3,7 @@ import { existsSync } from "node:fs";
 import path from "node:path";
 import { Command } from "commander";
 import { loadConfig } from "./config.js";
-import { ClaimConflictError, claimTask, loadClaims, releaseTask, saveClaims } from "./core/claims.js";
+import { ClaimConflictError, claimTask, releaseTask, touchClaim, updateClaims } from "./core/claims.js";
 import { digestInstruction, findOversized, writeDigest } from "./core/digest.js";
 import { appendEvent, readEvents, type EventType } from "./core/events.js";
 import { resolveIdentity } from "./core/session.js";
@@ -78,10 +78,10 @@ program
     requireChange(root, change);
     const config = loadConfig(root);
     const identity = resolveIdentity({ agent: opts.agent, session_id: opts.session });
-    const data = loadClaims(root, change);
 
-    const result = claimTask(data, taskId, identity.agent, identity.session_id, config.stale_claim_minutes);
-    saveClaims(root, change, data);
+    const result = updateClaims(root, change, function (data) {
+      return claimTask(data, taskId, identity.agent, identity.session_id, config.stale_claim_minutes);
+    });
 
     if (result.tookOverFrom) {
       console.log(
@@ -124,9 +124,9 @@ program
       throw new Error(`--status must be one of: ${valid.join(", ")}`);
     }
     const identity = resolveIdentity();
-    const data = loadClaims(root, change);
-    releaseTask(data, taskId, opts.status as "completed" | "released" | "abandoned");
-    saveClaims(root, change, data);
+    updateClaims(root, change, function (data) {
+      return releaseTask(data, taskId, opts.status as "completed" | "released" | "abandoned");
+    });
     appendEvent(root, change, {
       task_id: taskId,
       agent: identity.agent,
@@ -173,7 +173,18 @@ program
       type: opts.type as EventType,
       message: opts.message,
     });
+
+    // Logging is the signal that this session is still working, so it keeps the
+    // claim alive rather than letting a long task go stale under the agent.
+    let refreshed = null;
+    if (opts.task) {
+      refreshed = updateClaims(root, change, function (data) {
+        return touchClaim(data, opts.task as string, identity.session_id);
+      });
+    }
+
     console.log(`Logged ${opts.type} on ${opts.task ?? "change"} in "${change}".`);
+    if (refreshed) console.log(`Claim on ${opts.task} refreshed.`);
     reportOversized(root, change);
   });
 

@@ -1,7 +1,8 @@
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import YAML from "yaml";
 import { SCHEMA_VERSION } from "../config.js";
 import { changeFile } from "../paths.js";
+import { withLock } from "./lock.js";
 
 export type ClaimStatus = "active" | "released" | "completed" | "abandoned";
 
@@ -35,8 +36,34 @@ export function loadClaims(root: string, change: string): ClaimsFile {
   };
 }
 
+/** Writes via a temp file plus rename, so a reader never sees a half-written registry. */
 export function saveClaims(root: string, change: string, data: ClaimsFile): void {
-  writeFileSync(claimsPath(root, change), YAML.stringify(data), "utf8");
+  const file = claimsPath(root, change);
+  const tmp = `${file}.${process.pid}.tmp`;
+  writeFileSync(tmp, YAML.stringify(data), "utf8");
+  renameSync(tmp, file);
+}
+
+function lockPath(root: string, change: string): string {
+  return changeFile(root, change, "claims.lock");
+}
+
+/**
+ * Runs a load/mutate/save cycle under a cross-process lock. Every mutation of the
+ * claim registry must go through this: reading and writing as separate steps lets
+ * two concurrent agents each miss the other's claim.
+ */
+export function updateClaims<T>(
+  root: string,
+  change: string,
+  mutate: (data: ClaimsFile) => T,
+): T {
+  return withLock(lockPath(root, change), function () {
+    const data = loadClaims(root, change);
+    const result = mutate(data);
+    saveClaims(root, change, data);
+    return result;
+  });
 }
 
 export function isStale(claim: Claim, staleMinutes: number, now = new Date()): boolean {
@@ -103,6 +130,25 @@ export function claimTask(
   };
   data.claims.push(claim);
   return { claim };
+}
+
+/**
+ * Refreshes the heartbeat on a task this session already holds. Without this, a claim
+ * only gets a timestamp when it is taken, so an agent working longer than the staleness
+ * window has its task declared abandoned and reclaimed while it is still working.
+ */
+export function touchClaim(
+  data: ClaimsFile,
+  taskId: string,
+  sessionId: string,
+  now = new Date(),
+): Claim | null {
+  const claim = data.claims.find(
+    (c) => c.task_id === taskId && c.status === "active" && c.session_id === sessionId,
+  );
+  if (!claim) return null;
+  claim.last_heartbeat = now.toISOString();
+  return claim;
 }
 
 export function releaseTask(
