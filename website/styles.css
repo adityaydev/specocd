@@ -947,6 +947,22 @@ footer {
   line-height: 1.65;
 }
 
+.foot-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.foot-meta a {
+  color: var(--ink-soft);
+}
+
+.foot-meta a:hover {
+  color: var(--accent);
+  text-decoration: none;
+}
+
 .caveat strong {
   color: var(--ink-soft);
   font-weight: 600;
