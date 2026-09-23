@@ -1,13 +1,14 @@
 {
   "name": "specocd",
   "version": "1.0.0",
-  "description": "Lightweight, tool-agnostic spec-driven development framework with multi-agent context coordination",
+  "description": "Spec-driven development with multi-agent coordination: task claims, conflict detection and a shared decision log, so multiple AI coding agents can work the same change safely.",
   "type": "module",
   "bin": {
     "specocd": "dist/cli.js"
   },
   "files": [
-    "dist"
+    "dist",
+    "CHANGELOG.md"
   ],
   "engines": {
     "node": ">=20"
@@ -15,15 +16,19 @@
   "scripts": {
     "build": "tsc",
     "test": "node --test tests/**/*.test.js",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build && npm test"
   },
   "keywords": [
     "spec-driven-development",
     "sdd",
     "ai-agents",
+    "multi-agent",
     "claude-code",
     "cursor",
-    "copilot"
+    "copilot",
+    "codex",
+    "jira",
+    "cli"
   ],
   "license": "MIT",
   "dependencies": {
@@ -33,5 +38,6 @@
   "devDependencies": {
     "@types/node": "^22.7.5",
     "typescript": "^5.6.3"
-  }
+  },
+  "homepage": "https://specocd.in"
 }

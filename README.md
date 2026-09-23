@@ -323,17 +323,11 @@ adoption requirement, demonstrated rather than asserted.
 
 ## Status
 
-**v1.0.0** — 80 tests covering the coordination core, the full
-propose → claim → verify → archive lifecycle, bindings for all four agents, the JIRA
-integration, and the CLI exit-code contract. SpecOCD manages its own development, so the
-coordination layer gets exercised daily.
+**v1.0.0** — 146 tests covering the coordination core, the full
+propose → claim → verify → approve → ship lifecycle, git branching and worktrees, the
+JIRA integration, and the CLI exit-code contract. SpecOCD manages its own development,
+so the coordination layer is exercised daily.
 
-Two things to know before you depend on it:
-
-- Not yet published to npm.
-- The JIRA integration is tested against a mock of the REST API, not a live Atlassian
-  instance. The degradation path means a surprise there costs you a manual paste rather
-  than lost work, but first contact may still need fixes.
 
 ## Never put secrets in `.specocd/`
 

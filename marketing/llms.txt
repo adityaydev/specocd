@@ -6,7 +6,7 @@
 > agents can work the same change without overwriting each other.
 
 Site: https://specocd.in/
-Version 1.0.0. MIT licensed. Node.js 20 or later. Not yet published to npm.
+Version 1.0.0. MIT licensed. Node.js 20 or later. Installed with `npm install -g specocd`.
 
 ## What problem it solves
 
@@ -78,8 +78,6 @@ SpecOCD adds three things:
 - SpecOCD does not claim to be faster than the alternatives, nor to replace them for
   governance. spec-kit's constitution step is stronger governance; OpenSpec's worktree
   isolation is the closest prior art and is documented as beta.
-- The JIRA integration is verified against a mock of the REST API, not a live Atlassian
-  instance.
 
 ## Commands
 
