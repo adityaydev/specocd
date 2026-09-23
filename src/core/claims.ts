@@ -7,6 +7,17 @@ import { withLock } from "./lock.js";
 
 export type ClaimStatus = "active" | "released" | "completed" | "abandoned";
 
+/** Git provenance, absent when the project is not a git repository. */
+export interface ClaimGit {
+  branch?: string | null;
+  /** HEAD when the task was claimed, so the work can be diffed against it later. */
+  start_sha?: string | null;
+  /** HEAD when the claim ended. */
+  end_sha?: string | null;
+  /** Isolated checkout created for this task, when one was requested. */
+  worktree?: string | null;
+}
+
 export interface Claim {
   task_id: string;
   owner_agent: string;
@@ -14,6 +25,7 @@ export interface Claim {
   status: ClaimStatus;
   claimed_at: string;
   last_heartbeat: string;
+  git?: ClaimGit;
 }
 
 export interface ClaimsFile {
@@ -92,9 +104,20 @@ export function claimTask(
   sessionId: string,
   staleMinutes: number,
   now = new Date(),
+  gitContext?: ClaimGit,
 ): ClaimResult {
   const ts = now.toISOString();
   const existing = data.claims.find((c) => c.task_id === taskId && c.status === "active");
+
+  const fresh = (): Claim => ({
+    task_id: taskId,
+    owner_agent: agent,
+    session_id: sessionId,
+    status: "active",
+    claimed_at: ts,
+    last_heartbeat: ts,
+    ...(gitContext ? { git: gitContext } : {}),
+  });
 
   if (existing) {
     if (existing.session_id === sessionId) {
@@ -105,26 +128,12 @@ export function claimTask(
       throw new ClaimConflictError(existing);
     }
     existing.status = "abandoned";
-    const claim: Claim = {
-      task_id: taskId,
-      owner_agent: agent,
-      session_id: sessionId,
-      status: "active",
-      claimed_at: ts,
-      last_heartbeat: ts,
-    };
+    const claim = fresh();
     data.claims.push(claim);
     return { claim, tookOverFrom: existing };
   }
 
-  const claim: Claim = {
-    task_id: taskId,
-    owner_agent: agent,
-    session_id: sessionId,
-    status: "active",
-    claimed_at: ts,
-    last_heartbeat: ts,
-  };
+  const claim = fresh();
   data.claims.push(claim);
   return { claim };
 }
@@ -153,10 +162,12 @@ export function releaseTask(
   taskId: string,
   status: Exclude<ClaimStatus, "active">,
   now = new Date(),
+  endSha?: string | null,
 ): Claim {
   const claim = data.claims.find((c) => c.task_id === taskId && c.status === "active");
   if (!claim) throw new Error(`No active claim found for task ${taskId}.`);
   claim.status = status;
   claim.last_heartbeat = now.toISOString();
+  if (endSha) claim.git = { ...(claim.git ?? {}), end_sha: endSha };
   return claim;
 }

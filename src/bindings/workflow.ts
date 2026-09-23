@@ -26,6 +26,19 @@ spec or task list alone.
 
 Keep ceremony proportional: a small fix needs a few lines, not a PRD.
 
+## Git
+
+Claiming records the branch and HEAD; releasing records HEAD again, so each task carries
+the commit range that implemented it. Commit your work before releasing, or that range
+will be empty and the trail is lost.
+
+When another agent is working a different task of the same change at the same time, take
+an isolated checkout rather than sharing one working tree:
+\`specocd worktree add <change> <task-id>\` prints a path to cd into, on its own branch.
+Clean it up with \`specocd worktree remove <change> <task-id>\` once the work is merged.
+
+SpecOCD never commits, pushes or merges on your behalf. Those stay the developer's call.
+
 NEVER write credentials, tokens or PII into events, specs or digests — these are committed
 to git history.
 

@@ -10,6 +10,7 @@ import {
   type Requirement,
   type Task,
 } from "../core/markdown.js";
+import { repoState, shortSha, type RepoState } from "../core/git.js";
 import { changeDir, changeFile } from "../paths.js";
 
 export interface ChangeContext {
@@ -28,6 +29,7 @@ export interface ChangeContext {
   oversized: OversizedArtifact[];
   /** Tasks with no claim and not yet done: what an arriving agent can pick up. */
   available: Task[];
+  repo: RepoState;
 }
 
 /**
@@ -65,6 +67,7 @@ export function show(root: string, change: string): ChangeContext {
     blockers: events.filter((e) => e.type === "blocker"),
     oversized: findOversized(root, change, config.size_cap_kb),
     available: tasks.filter((t) => !t.done && !held.has(t.id)),
+    repo: repoState(root),
   };
 }
 
@@ -74,6 +77,12 @@ export function renderContext(ctx: ChangeContext): string {
     "",
     `status: ${ctx.status}${ctx.approved ? " (approved)" : ""} · feature: ${ctx.feature}` +
       (ctx.jira ? ` · JIRA: ${ctx.jira}` : ""),
+    ...(ctx.repo.isRepo
+      ? [
+          `git: ${ctx.repo.branch ?? "detached"} at ${shortSha(ctx.repo.sha)}` +
+            (ctx.repo.dirty ? " (uncommitted changes)" : " (clean)"),
+        ]
+      : []),
     "",
     "## Requirements",
     "",
@@ -97,7 +106,22 @@ export function renderContext(ctx: ChangeContext): string {
               : t.done
                 ? ""
                 : " — unclaimed";
-          return `- [${t.done ? "x" : " "}] ${t.id}: ${t.title}${who}`;
+
+          const done = ctx.finishedClaims.find((c) => c.task_id === t.id && c.git?.end_sha);
+          const g = claim?.git ?? stale?.git ?? done?.git;
+          const trail: string[] = [];
+          if (g?.branch) trail.push(g.branch);
+          if (g?.start_sha && g?.end_sha && g.start_sha !== g.end_sha) {
+            trail.push(`${shortSha(g.start_sha)}..${shortSha(g.end_sha)}`);
+          } else if (g?.start_sha) {
+            trail.push(`from ${shortSha(g.start_sha)}`);
+          }
+          if (g?.worktree) trail.push(`worktree ${g.worktree}`);
+
+          return (
+            `- [${t.done ? "x" : " "}] ${t.id}: ${t.title}${who}` +
+            (trail.length > 0 ? `\n    ${trail.join(" · ")}` : "")
+          );
         })),
     "",
     "## Decisions so far",

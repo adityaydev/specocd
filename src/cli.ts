@@ -6,6 +6,7 @@ import { loadConfig } from "./config.js";
 import { ClaimConflictError, claimTask, releaseTask, touchClaim, updateClaims } from "./core/claims.js";
 import { digestInstruction, findOversized, writeDigest } from "./core/digest.js";
 import { appendEvent, readEvents, type EventType } from "./core/events.js";
+import { changedFiles, repoState, shortSha } from "./core/git.js";
 import { resolveIdentity } from "./core/session.js";
 import { archive } from "./commands/archive.js";
 import { listBindings, syncBindings } from "./commands/bindings.js";
@@ -22,7 +23,8 @@ import { renderTicket } from "./integrations/jira/format.js";
 import { init } from "./commands/init.js";
 import { renderContext, show } from "./commands/show.js";
 import { propose } from "./commands/propose.js";
-import { status } from "./commands/status.js";
+import { listChanges, status } from "./commands/status.js";
+import { createWorktree, dropWorktree, listTaskWorktrees } from "./commands/worktree.js";
 import { verify, verifyInstruction } from "./commands/verify.js";
 import { changeDir, requireRoot } from "./paths.js";
 
@@ -81,8 +83,18 @@ program
     const config = loadConfig(root);
     const identity = resolveIdentity({ agent: opts.agent, session_id: opts.session });
 
+    // Recording where the work started lets the task be diffed against it later.
+    const repo = repoState(root);
     const result = updateClaims(root, change, function (data) {
-      return claimTask(data, taskId, identity.agent, identity.session_id, config.stale_claim_minutes);
+      return claimTask(
+        data,
+        taskId,
+        identity.agent,
+        identity.session_id,
+        config.stale_claim_minutes,
+        new Date(),
+        repo.isRepo ? { branch: repo.branch, start_sha: repo.sha } : undefined,
+      );
     });
 
     if (result.tookOverFrom) {
@@ -126,8 +138,15 @@ program
       throw new Error(`--status must be one of: ${valid.join(", ")}`);
     }
     const identity = resolveIdentity();
-    updateClaims(root, change, function (data) {
-      return releaseTask(data, taskId, opts.status as "completed" | "released" | "abandoned");
+    const repo = repoState(root);
+    const released = updateClaims(root, change, function (data) {
+      return releaseTask(
+        data,
+        taskId,
+        opts.status as "completed" | "released" | "abandoned",
+        new Date(),
+        repo.sha,
+      );
     });
     appendEvent(root, change, {
       task_id: taskId,
@@ -137,6 +156,15 @@ program
       message: `Claim ended: ${opts.status}`,
     });
     console.log(`Released ${taskId} in "${change}" (${opts.status}).`);
+
+    const from = released.git?.start_sha;
+    const to = released.git?.end_sha;
+    if (from && to && from !== to) {
+      const files = changedFiles(root, from, to);
+      console.log(`  ${shortSha(from)}..${shortSha(to)} — ${files.length} file(s) changed`);
+    } else if (from && to) {
+      console.log(`  no commits recorded against this task (HEAD unchanged since the claim)`);
+    }
   });
 
 program
@@ -230,6 +258,56 @@ program
     requireChange(root, change);
     const ctx = show(root, change);
     console.log(opts.json ? JSON.stringify(ctx, null, 2) : renderContext(ctx));
+  });
+
+const worktree = program
+  .command("worktree")
+  .description("Isolated git checkouts, so agents can build different tasks at once");
+
+worktree
+  .command("add")
+  .argument("<change>")
+  .argument("<task-id>")
+  .description("Create an isolated checkout on a branch for this task")
+  .action((change: string, taskId: string) => {
+    const root = requireRoot();
+    requireChange(root, change);
+    const result = createWorktree(root, change, taskId);
+    console.log(
+      result.existed
+        ? `Worktree already exists for ${taskId} on ${result.branch}`
+        : `Created worktree for ${taskId} on ${result.branch}`,
+    );
+    console.log(`  ${result.path}`);
+    console.log(`\ncd ${result.path}`);
+  });
+
+worktree
+  .command("list")
+  .description("Show SpecOCD worktrees and which claim owns each")
+  .action(() => {
+    const root = requireRoot();
+    const trees = listTaskWorktrees(root, listChanges(root));
+    if (trees.length === 0) {
+      console.log("No SpecOCD worktrees. Create one with `specocd worktree add <change> <task>`.");
+      return;
+    }
+    for (const t of trees) {
+      const owner = t.claim ? `${t.claim.task_id} — ${t.claim.owner_agent} (${t.claim.session_id})` : "unclaimed";
+      console.log(`${t.branch ?? "(detached)"}\n  ${t.path}\n  ${owner}`);
+    }
+  });
+
+worktree
+  .command("remove")
+  .argument("<change>")
+  .argument("<task-id>")
+  .option("--force", "discard uncommitted changes in the worktree")
+  .description("Remove a task's isolated checkout")
+  .action((change: string, taskId: string, opts: { force?: boolean }) => {
+    const root = requireRoot();
+    const dir = dropWorktree(root, change, taskId, opts.force);
+    console.log(`Removed worktree ${dir}`);
   });
 
 program

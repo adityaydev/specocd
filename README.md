@@ -55,6 +55,32 @@ Claims are mutated under a cross-process lock and written atomically, so concurr
 agents cannot lose each other's claims. Logging refreshes your claim's heartbeat, so a
 long task does not go stale under the agent still working it.
 
+## Git
+
+Git is optional — SpecOCD works in a plain directory — but when the project is a repo it
+records provenance and can give each agent its own checkout.
+
+- **Commit trail per task.** Claiming records the branch and HEAD; releasing records HEAD
+  again. `specocd show` then displays the range that implemented each task, and `release`
+  reports how many files changed.
+- **Isolated worktrees.** `specocd worktree add <change> <task>` creates a checkout beside
+  the repo on branch `specocd/<change>/<task>`, so two agents can build different tasks of
+  one change without sharing a working tree. `specocd worktree list` shows each one and
+  the claim that owns it; `remove` cleans up.
+- **Repo state in context.** `specocd show` reports the current branch, HEAD and whether
+  the tree is dirty, so an agent knows what it is standing on.
+
+SpecOCD never commits, pushes, merges or rebases on your behalf. It records what git
+already knows; the decisions stay yours.
+
+```bash
+specocd claim rate-limiting T2
+specocd worktree add rate-limiting T2    # isolated checkout on its own branch
+# ... implement, commit ...
+specocd release rate-limiting T2 --status completed
+specocd worktree remove rate-limiting T2
+```
+
 ## Context budget
 
 Artifacts have a size cap (default 50 KB). When one is exceeded, the CLI prints an explicit
@@ -87,6 +113,9 @@ itself — no API keys, no external service.
 | `specocd verify <change>` | Structural checks, then hands semantic verification to the agent |
 | `specocd archive <change> [--force]` | Fold into the baseline spec and freeze the change |
 | `specocd digest <change>` | Regenerate the structural digest |
+| `specocd worktree add <change> <task>` | Isolated git checkout on its own branch |
+| `specocd worktree list` | SpecOCD worktrees and the claims that own them |
+| `specocd worktree remove <change> <task> [--force]` | Clean up a task's checkout |
 | `specocd bindings list` | Show available, detected and enabled agent bindings |
 | `specocd bindings sync [--all] [--only a,b]` | Regenerate binding files |
 | `specocd jira setup` | Create the gitignored credentials file |
