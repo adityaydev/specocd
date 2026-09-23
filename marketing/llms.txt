@@ -5,6 +5,7 @@
 > and adds the coordination layer other SDD frameworks leave out, so multiple AI coding
 > agents can work the same change without overwriting each other.
 
+Site: https://specocd.in/
 Version 1.0.0. MIT licensed. Node.js 20 or later. Not yet published to npm.
 
 ## What problem it solves

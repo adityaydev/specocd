@@ -1,5 +1,4 @@
 # SpecOCD
-# Replace the sitemap host with your real domain before deploying.
 
 User-agent: *
 Allow: /
@@ -27,4 +26,4 @@ Allow: /
 User-agent: Applebot-Extended
 Allow: /
 
-Sitemap: https://specocd.dev/sitemap.xml
+Sitemap: https://specocd.in/sitemap.xml
