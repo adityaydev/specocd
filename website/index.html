@@ -38,6 +38,23 @@
 
 <link rel="icon" href="favicon.svg" type="image/svg+xml" />
 
+<!--
+  Applies a saved theme before first paint. Inline and blocking on purpose: loading
+  this any later means the page renders in the wrong theme and then corrects itself.
+-->
+<script>
+  (function () {
+    try {
+      var saved = localStorage.getItem("specocd-theme");
+      if (saved === "light" || saved === "dark") {
+        document.documentElement.setAttribute("data-theme", saved);
+      }
+    } catch (error) {
+      // Private windows and blocked site data throw here; system theme is a fine default.
+    }
+  })();
+</script>
+
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link
@@ -228,6 +245,7 @@
       <a href="#jira">JIRA</a>
       <a class="nav-cta" href="#start">Get started</a>
     </nav>
+
   </div>
 </header>
 
@@ -861,15 +879,29 @@ Approved and committed a3f91c2 on fix/PROJ-42-login-timeout.
         </a>
         <p>Specification-Obsessed Development</p>
       </div>
-      <nav class="foot-links">
-        <a href="#problem">Problem</a>
-        <a href="#how">How it works</a>
-        <a href="#git">Git</a>
-        <a href="#compare">Compare</a>
-        <a href="#jira">JIRA</a>
-        <a href="#start">Get started</a>
-        <a href="https://github.com/adityaydev/specocd">GitHub</a>
-      </nav>
+
+      <div class="theme-toggle" role="radiogroup" aria-label="Colour theme">
+        <button type="button" role="radio" aria-checked="false" data-theme-choice="light" title="Light">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <circle cx="12" cy="12" r="4.2" />
+            <path d="M12 2.6v2.2M12 19.2v2.2M4.36 4.36l1.56 1.56M18.08 18.08l1.56 1.56M2.6 12h2.2M19.2 12h2.2M4.36 19.64l1.56-1.56M18.08 5.92l1.56-1.56" />
+          </svg>
+          <span class="sr-only">Light</span>
+        </button>
+        <button type="button" role="radio" aria-checked="false" data-theme-choice="dark" title="Dark">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M20.2 14.4A8.6 8.6 0 0 1 9.6 3.8a8.6 8.6 0 1 0 10.6 10.6Z" />
+          </svg>
+          <span class="sr-only">Dark</span>
+        </button>
+        <button type="button" role="radio" aria-checked="true" data-theme-choice="system" title="Match system">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <rect x="2.8" y="4.2" width="18.4" height="12.6" rx="2.2" />
+            <path d="M8.6 20.4h6.8" />
+          </svg>
+          <span class="sr-only">Match system</span>
+        </button>
+      </div>
     </div>
 
     <dl class="facts">
@@ -892,6 +924,67 @@ Approved and committed a3f91c2 on fix/PROJ-42-login-timeout.
 </footer>
 
 <script>
+  // Theme: light, dark, or follow the system. "system" means no attribute at all,
+  // which is what lets the prefers-color-scheme rules in the stylesheet apply.
+  (function () {
+    var KEY = "specocd-theme";
+    var root = document.documentElement;
+    var buttons = Array.prototype.slice.call(document.querySelectorAll("[data-theme-choice]"));
+    if (buttons.length === 0) return;
+
+    function read() {
+      try {
+        var saved = localStorage.getItem(KEY);
+        return saved === "light" || saved === "dark" ? saved : "system";
+      } catch (error) {
+        return "system";
+      }
+    }
+
+    // A forced theme has to override the media-based theme-color metas, or the
+    // browser chrome keeps painting the system theme's colour.
+    function paintBrowserChrome(choice) {
+      var override = document.getElementById("theme-color-override");
+      if (choice === "system") {
+        if (override) override.remove();
+        return;
+      }
+      if (!override) {
+        override = document.createElement("meta");
+        override.id = "theme-color-override";
+        override.name = "theme-color";
+        // First matching meta wins, so it goes ahead of the media-scoped pair.
+        document.head.insertBefore(override, document.head.firstChild);
+      }
+      override.content = choice === "dark" ? "#000000" : "#ffffff";
+    }
+
+    function apply(choice) {
+      if (choice === "system") root.removeAttribute("data-theme");
+      else root.setAttribute("data-theme", choice);
+
+      buttons.forEach(function (button) {
+        button.setAttribute("aria-checked", String(button.dataset.themeChoice === choice));
+      });
+      paintBrowserChrome(choice);
+    }
+
+    buttons.forEach(function (button) {
+      button.addEventListener("click", function () {
+        var choice = button.dataset.themeChoice;
+        try {
+          if (choice === "system") localStorage.removeItem(KEY);
+          else localStorage.setItem(KEY, choice);
+        } catch (error) {
+          // Not persistable here; the choice still applies for this page view.
+        }
+        apply(choice);
+      });
+    });
+
+    apply(read());
+  })();
+
   // Lift the nav once the page has scrolled beneath it.
   (function () {
     var nav = document.getElementById("nav");

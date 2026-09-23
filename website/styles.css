@@ -260,6 +260,8 @@ h3 {
   height: 66px;
 }
 
+
+
 .nav-brand {
   display: flex;
   align-items: center;
@@ -371,6 +373,76 @@ h3 {
 @media (prefers-reduced-motion: reduce) {
   .nav-links a::after {
     transition: none;
+  }
+}
+
+/* ---------- theme toggle ---------- */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex: none;
+  padding: 3px;
+  border: 1px solid var(--hairline-soft);
+  border-radius: 980px;
+  background: color-mix(in srgb, var(--ground-alt) 70%, transparent);
+}
+
+.theme-toggle button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 26px;
+  padding: 0;
+  border: none;
+  border-radius: 980px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+.theme-toggle button svg {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.theme-toggle button:hover {
+  color: var(--ink);
+}
+
+/* The chosen mode is the one carrying the accent, so the state reads at a glance. */
+.theme-toggle button[aria-checked="true"] {
+  background: var(--ground);
+  color: var(--accent);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+:root[data-theme="dark"] .theme-toggle button[aria-checked="true"] {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .theme-toggle button[aria-checked="true"] {
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
   }
 }
 
@@ -833,21 +905,6 @@ footer {
 
 .foot-brand p {
   color: var(--muted);
-}
-
-.foot-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 34px;
-}
-
-.foot-links a {
-  color: var(--ink-soft);
-}
-
-.foot-links a:hover {
-  color: var(--accent);
-  text-decoration: none;
 }
 
 /* Release facts read as data, so they get a label/value grid and lining figures. */
