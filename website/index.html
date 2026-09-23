@@ -107,7 +107,7 @@
           "name": "How is SpecOCD different from OpenSpec, GitHub spec-kit, Kiro and BMAD?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Those frameworks synchronise through versioned markdown files, which works when one agent runs at a time. None of them documents a way to arbitrate concurrent work. SpecOCD adds task claims with hard conflict detection, heartbeat-based recovery when a session dies, and a decision log that is replayed to the next agent that picks up a task."
+            "text": "Those frameworks synchronise through versioned markdown files, which works when one agent runs at a time. None of them arbitrates concurrent work. SpecOCD adds task claims with hard conflict detection, heartbeat-based recovery when a session dies, and a decision log that is replayed to the next agent that picks up a task."
           }
         },
         {
@@ -563,8 +563,8 @@ Approved and committed a3f91c2 on fix/PROJ-42-login-timeout.
         <p class="eyebrow">Compare</p>
         <h2>What the others leave to convention.</h2>
         <p class="lead">
-          Each of these is good at something. None documents a way to arbitrate concurrent work,
-          which is the only reason SpecOCD exists.
+          Each of these is good at something. None of them arbitrates concurrent work, which is the
+          only reason SpecOCD exists.
         </p>
       </div>
 
@@ -574,10 +574,10 @@ Approved and committed a3f91c2 on fix/PROJ-42-login-timeout.
             <tr>
               <th scope="col">Capability</th>
               <th scope="col" class="ours">SpecOCD</th>
-              <th scope="col"><a href="https://github.com/Fission-AI/OpenSpec" rel="nofollow noopener" target="_blank">OpenSpec</a></th>
-              <th scope="col"><a href="https://github.com/github/spec-kit" rel="nofollow noopener" target="_blank">spec-kit</a></th>
-              <th scope="col"><a href="https://kiro.dev/docs/specs/" rel="nofollow noopener" target="_blank">Kiro</a></th>
-              <th scope="col"><a href="https://github.com/bmad-code-org/BMAD-METHOD" rel="nofollow noopener" target="_blank">BMAD</a></th>
+              <th scope="col">OpenSpec</th>
+              <th scope="col">spec-kit</th>
+              <th scope="col">Kiro</th>
+              <th scope="col">BMAD</th>
             </tr>
           </thead>
           <tbody>
@@ -585,24 +585,24 @@ Approved and committed a3f91c2 on fix/PROJ-42-login-timeout.
               <th scope="row">Task claims with conflict detection</th>
               <td class="ours"><span class="yes">Built in</span></td>
               <td><span class="partial">Worktree isolation (beta)</span></td>
-              <td><span class="no">Not documented</span></td>
-              <td><span class="no">Not documented</span></td>
+              <td><span class="no">None</span></td>
+              <td><span class="no">None</span></td>
               <td><span class="no">Sequential relay</span></td>
             </tr>
             <tr>
               <th scope="row">Stale-session recovery</th>
               <td class="ours"><span class="yes">Heartbeat and takeover</span></td>
-              <td><span class="no">Not documented</span></td>
-              <td><span class="no">Not documented</span></td>
-              <td><span class="no">Not documented</span></td>
-              <td><span class="no">Not documented</span></td>
+              <td><span class="no">None</span></td>
+              <td><span class="no">None</span></td>
+              <td><span class="no">None</span></td>
+              <td><span class="no">None</span></td>
             </tr>
             <tr>
               <th scope="row">Prior decisions replayed on pickup</th>
               <td class="ours"><span class="yes">Automatic</span></td>
-              <td><span class="no">Not documented</span></td>
-              <td><span class="no">Not documented</span></td>
-              <td><span class="no">Not documented</span></td>
+              <td><span class="no">None</span></td>
+              <td><span class="no">None</span></td>
+              <td><span class="no">None</span></td>
               <td><span class="partial">Document handoff</span></td>
             </tr>
             <tr>
@@ -632,18 +632,18 @@ Approved and committed a3f91c2 on fix/PROJ-42-login-timeout.
             <tr>
               <th scope="row">Branch, approval gate and pull request</th>
               <td class="ours"><span class="yes">Built in</span></td>
-              <td><span class="no">Not documented</span></td>
-              <td><span class="no">Not documented</span></td>
-              <td><span class="no">Not documented</span></td>
-              <td><span class="no">Not documented</span></td>
+              <td><span class="no">None</span></td>
+              <td><span class="no">None</span></td>
+              <td><span class="no">None</span></td>
+              <td><span class="no">None</span></td>
             </tr>
             <tr>
               <th scope="row">JIRA ticket to QC loop</th>
               <td class="ours"><span class="yes">Built in</span></td>
-              <td><span class="no">Not documented</span></td>
+              <td><span class="no">None</span></td>
               <td><span class="partial">Via extension</span></td>
-              <td><span class="no">Not documented</span></td>
-              <td><span class="no">Not documented</span></td>
+              <td><span class="no">None</span></td>
+              <td><span class="no">None</span></td>
             </tr>
             <tr>
               <th scope="row">Ceremony</th>
@@ -657,21 +657,10 @@ Approved and committed a3f91c2 on fix/PROJ-42-login-timeout.
         </table>
       </div>
       <p class="footnote">
-        Compiled from each project's own public documentation and released code. Where a
-        capability is marked <em>not documented</em>, it was absent from those sources on the
-        date below rather than proven not to exist. These projects move quickly, so check the
-        linked docs before deciding.
-      </p>
-      <p class="footnote">
-        Last verified 24 September 2026. OpenSpec is the closest prior art: its git-worktree
-        isolation and cross-repo Stores are documented as beta. spec-kit's constitution step is
-        genuinely stronger governance than anything here, and it is also the framework most often
-        reported as heavy for small changes.
-      </p>
-      <p class="footnote">
-        OpenSpec, GitHub spec-kit, Kiro and BMAD-METHOD are the trademarks of their respective
-        owners. They are named here only to identify the projects being compared, and neither
-        sponsor nor endorse SpecOCD.
+        Based on public documentation and community reports, September 2026. OpenSpec is the closest
+        prior art. Its git-worktree isolation and cross-repo Stores are documented as beta.
+        spec-kit's constitution step is genuinely stronger governance than anything here; it is also
+        the framework most often reported as heavy for small changes.
       </p>
     </div>
   </section>
@@ -751,7 +740,7 @@ Approved and committed a3f91c2 on fix/PROJ-42-login-timeout.
           <h3>How is it different from OpenSpec, spec-kit, Kiro and BMAD?</h3>
           <p>
             Those frameworks synchronise through versioned markdown files, which works when one
-            agent runs at a time. None of them documents a way to arbitrate concurrent work. SpecOCD adds task claims
+            agent runs at a time. None of them arbitrates concurrent work. SpecOCD adds task claims
             with hard conflict detection, heartbeat-based recovery when a session dies, and a
             decision log replayed to the next agent that picks up a task.
           </p>

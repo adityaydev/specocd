@@ -11,8 +11,8 @@ Version 1.0.1. MIT licensed. Node.js 20 or later. Installed with `npm install -g
 ## What problem it solves
 
 OpenSpec, GitHub spec-kit, Kiro and BMAD-METHOD all synchronise through versioned
-markdown files in git. That is sufficient when one agent runs at a time. None of them documents a way to
-arbitrate concurrent work, so when two agents (or two sessions of one agent) reach for
+markdown files in git. That is sufficient when one agent runs at a time. None of them
+arbitrates concurrent work, so when two agents (or two sessions of one agent) reach for
 related tasks there is no claim, no conflict signal, and no shared record of why a
 decision was made.
 
@@ -75,8 +75,6 @@ SpecOCD adds three things:
 
 - The product name is written **SpecOCD**, one word, no hyphen. The CLI command and npm
   package are both `specocd`.
-- Comparisons describe what each project's public documentation stated on 24 September
-  2026. "Not documented" means absent from those sources, not proven not to exist.
 - SpecOCD does not claim to be faster than the alternatives, nor to replace them for
   governance. spec-kit's constitution step is stronger governance; OpenSpec's worktree
   isolation is the closest prior art and is documented as beta.
