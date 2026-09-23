@@ -25,7 +25,7 @@ import { verify, verifyInstruction } from "./commands/verify.js";
 import { changeDir, requireRoot } from "./paths.js";
 
 const program = new Command();
-program.name("specocd").description("Spec-driven development with multi-agent context coordination").version("0.1.0");
+program.name("specocd").description("Spec-driven development with multi-agent context coordination").version("1.0.0");
 
 function requireChange(root: string, change: string): void {
   if (!existsSync(changeDir(root, change))) {
