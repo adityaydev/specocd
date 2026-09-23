@@ -5,3 +5,6 @@ dist/
 
 # SpecOCD credentials — never commit
 .specocd/credentials.yaml
+
+# Firebase deploy cache, rewritten on every deploy
+.firebase/
