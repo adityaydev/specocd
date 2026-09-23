@@ -1,0 +1,30 @@
+# SpecOCD
+# Replace the sitemap host with your real domain before deploying.
+
+User-agent: *
+Allow: /
+
+# Answer engines and AI crawlers are welcome: the FAQ and structured data on this
+# site exist to be quoted accurately rather than paraphrased from third parties.
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-SearchBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+Sitemap: https://specocd.dev/sitemap.xml

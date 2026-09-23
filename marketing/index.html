@@ -1,4 +1,45 @@
-<title>SpecOCD</title>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+
+<!-- REPLACE https://specocd.dev with your real domain: it appears here, in the
+     canonical link, the Open Graph tags, sitemap.xml and robots.txt. -->
+<title>SpecOCD: Spec-Driven Development for Multi-Agent AI Coding</title>
+<meta
+  name="description"
+  content="A lightweight spec-driven development framework that keeps multiple AI coding agents in sync with task claims, conflict detection and a shared decision log."
+/>
+<link rel="canonical" href="https://specocd.dev/" />
+<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
+<meta name="author" content="SpecOCD" />
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
+
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="SpecOCD" />
+<meta property="og:title" content="SpecOCD: Spec-Driven Development for Multi-Agent AI Coding" />
+<meta
+  property="og:description"
+  content="Task claims, conflict detection and a shared decision log, so two AI agents never silently overwrite each other's work."
+/>
+<meta property="og:url" content="https://specocd.dev/" />
+<meta property="og:image" content="https://specocd.dev/og-image.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="SpecOCD: specs that hold up when agents work in parallel." />
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="SpecOCD: Spec-Driven Development for Multi-Agent AI Coding" />
+<meta
+  name="twitter:description"
+  content="Task claims, conflict detection and a shared decision log, so two AI agents never silently overwrite each other's work."
+/>
+<meta name="twitter:image" content="https://specocd.dev/og-image.png" />
+
+<link rel="icon" href="favicon.svg" type="image/svg+xml" />
+
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link
@@ -6,6 +47,106 @@
   href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap"
 />
 <link rel="stylesheet" href="styles.css" />
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "SoftwareApplication",
+      "name": "SpecOCD",
+      "alternateName": "Specification-Obsessed Development",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "macOS, Linux, Windows",
+      "softwareVersion": "1.0.0",
+      "softwareRequirements": "Node.js 20 or later",
+      "url": "https://specocd.dev/",
+      "license": "https://opensource.org/licenses/MIT",
+      "description": "A lightweight, tool-agnostic spec-driven development framework that coordinates multiple AI coding agents working the same change, using task claims, conflict detection and an append-only decision log.",
+      "featureList": [
+        "Task claims with conflict detection",
+        "Heartbeat-based recovery of stale claims",
+        "Append-only decision log replayed to the next agent",
+        "WHEN/THEN acceptance criteria and verification",
+        "Bindings for Claude Code, Cursor, GitHub Copilot and Codex",
+        "JIRA ticket to QC workflow with manual fallback"
+      ],
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is SpecOCD?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "SpecOCD (Specification-Obsessed Development) is a lightweight, tool-agnostic spec-driven development framework. It stores specs as plain files in your repository and adds a coordination layer so multiple AI coding agents can work on the same change without overwriting each other."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How is SpecOCD different from OpenSpec, GitHub spec-kit, Kiro and BMAD?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Those frameworks synchronise through versioned markdown files, which works when one agent runs at a time. None of them arbitrates concurrent work. SpecOCD adds task claims with hard conflict detection, heartbeat-based recovery when a session dies, and a decision log that is replayed to the next agent that picks up a task."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How does SpecOCD stop two AI agents working on the same task?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "An agent must claim a task before editing code. Claims are recorded in a claims.yaml file beside the tasks. If a second agent claims a task that another live session already holds, the command fails with exit code 2 rather than allowing a silent overwrite."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does SpecOCD work with existing projects?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Running specocd init in an existing repository creates a .specocd directory and generates agent bindings without modifying any existing files. There is no restructuring and no assumption about your language, framework or build system."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Which AI coding agents does SpecOCD support?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Claude Code, Cursor, GitHub Copilot and Codex. SpecOCD generates the binding files each tool reads, so the same workflow applies whichever agent is driving. Binding generation is pluggable, so further agents can be added without changing the core."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does SpecOCD need an API key or send my code anywhere?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. The command line tool never calls a language model itself, so it needs no API key and no external service. When a spec exceeds its size cap, it prints an instruction for whichever agent is already running to regenerate the digest. The only optional network calls are to your own JIRA instance."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can SpecOCD work from JIRA tickets?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Add a JIRA API token to a gitignored credentials file, then specocd jira start PROJ-123 fetches the ticket title, description, comments, due date and attachments and scaffolds a change from it. After verification, specocd jira handoff comments on the ticket and moves it to your QC stage."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What happens if SpecOCD cannot update the JIRA ticket?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Reading a ticket is the only hard requirement. If posting the comment or transitioning the ticket fails because of permissions or workflow rules, SpecOCD writes a paste-ready jira-handoff.md file, prints the comment to the terminal and exits with code 3. It lists whatever already succeeded so you never double-post or move a ticket twice."
+          }
+        }
+      ]
+    }
+  ]
+}
+</script>
+</head>
+<body>
 
 <!--
   The mark: a spec sheet whose requirements are checked off, with a code glyph
@@ -42,6 +183,8 @@
     </g>
   </symbol>
 </svg>
+
+<a class="skip-link" href="#top">Skip to content</a>
 
 <header class="nav" id="nav">
   <div class="wrap nav-inner">
@@ -381,7 +524,90 @@ rate-limiting
     </div>
   </section>
 
-  <section id="start">
+  <section id="faq">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Questions</p>
+        <h2>Common questions.</h2>
+      </div>
+
+      <div class="faq">
+        <div class="qa">
+          <h3>What is SpecOCD?</h3>
+          <p>
+            SpecOCD (Specification-Obsessed Development) is a lightweight, tool-agnostic
+            spec-driven development framework. It stores specs as plain files in your repository
+            and adds a coordination layer so multiple AI coding agents can work the same change
+            without overwriting each other.
+          </p>
+        </div>
+        <div class="qa">
+          <h3>How is it different from OpenSpec, spec-kit, Kiro and BMAD?</h3>
+          <p>
+            Those frameworks synchronise through versioned markdown files, which works when one
+            agent runs at a time. None of them arbitrates concurrent work. SpecOCD adds task claims
+            with hard conflict detection, heartbeat-based recovery when a session dies, and a
+            decision log replayed to the next agent that picks up a task.
+          </p>
+        </div>
+        <div class="qa">
+          <h3>How does it stop two agents working the same task?</h3>
+          <p>
+            An agent must claim a task before editing code. Claims are recorded in
+            <code>claims.yaml</code> beside the tasks. If a second agent claims a task another live
+            session already holds, the command fails with exit code 2 rather than allowing a silent
+            overwrite.
+          </p>
+        </div>
+        <div class="qa">
+          <h3>Does it work with existing projects?</h3>
+          <p>
+            Yes. Running <code>specocd init</code> in an existing repository creates a
+            <code>.specocd/</code> directory and generates agent bindings without modifying any
+            existing files. No restructuring, and no assumption about your language, framework or
+            build system.
+          </p>
+        </div>
+        <div class="qa">
+          <h3>Which AI coding agents are supported?</h3>
+          <p>
+            Claude Code, Cursor, GitHub Copilot and Codex. SpecOCD generates the binding files each
+            tool reads, so the same workflow applies whichever agent is driving. Binding generation
+            is pluggable, so further agents can be added without changing the core.
+          </p>
+        </div>
+        <div class="qa">
+          <h3>Does it need an API key or send my code anywhere?</h3>
+          <p>
+            No. The CLI never calls a language model itself, so it needs no API key and no external
+            service. When a spec exceeds its size cap it prints an instruction for whichever agent
+            is already running to regenerate the digest. The only optional network calls are to
+            your own JIRA instance.
+          </p>
+        </div>
+        <div class="qa">
+          <h3>Can it work from JIRA tickets?</h3>
+          <p>
+            Yes. Add a JIRA API token to a gitignored credentials file, then
+            <code>specocd jira start PROJ-123</code> fetches the ticket title, description,
+            comments, due date and attachments, and scaffolds a change from it. After verification,
+            <code>specocd jira handoff</code> comments on the ticket and moves it to your QC stage.
+          </p>
+        </div>
+        <div class="qa">
+          <h3>What if the JIRA update fails?</h3>
+          <p>
+            Reading a ticket is the only hard requirement. If posting the comment or transitioning
+            the ticket fails on permissions or workflow rules, SpecOCD writes a paste-ready
+            <code>jira-handoff.md</code>, prints the comment to the terminal and exits with code 3.
+            It lists whatever already succeeded, so you never double-post or move a ticket twice.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="start">
     <div class="wrap">
       <div class="section-head">
         <p class="eyebrow">Get started</p>
@@ -517,3 +743,6 @@ rate-limiting
     });
   });
 </script>
+
+</body>
+</html>

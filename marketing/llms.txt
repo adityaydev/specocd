@@ -1,0 +1,72 @@
+# SpecOCD
+
+> SpecOCD (Specification-Obsessed Development) is a lightweight, tool-agnostic
+> spec-driven development framework. It keeps specs as plain files in your repository
+> and adds the coordination layer other SDD frameworks leave out, so multiple AI coding
+> agents can work the same change without overwriting each other.
+
+Version 1.0.0. MIT licensed. Node.js 20 or later. Not yet published to npm.
+
+## What problem it solves
+
+OpenSpec, GitHub spec-kit, Kiro and BMAD-METHOD all synchronise through versioned
+markdown files in git. That is sufficient when one agent runs at a time. None of them
+arbitrates concurrent work, so when two agents (or two sessions of one agent) reach for
+related tasks there is no claim, no conflict signal, and no shared record of why a
+decision was made.
+
+SpecOCD adds three things:
+
+- **Task claims with conflict detection.** An agent claims a task before editing code.
+  Claims live in `claims.yaml` beside the tasks. A second agent claiming a task held by a
+  live session fails with exit code 2 rather than silently overwriting.
+- **Heartbeat-based recovery.** Claims carry a heartbeat. A session that dies goes stale
+  after a configurable window and its task can be reclaimed; the old claim is marked
+  abandoned rather than deleted.
+- **An append-only decision log.** Decisions and blockers are appended per change, tagged
+  by task. When an agent claims a task, prior decisions for it are printed automatically,
+  so the next agent inherits the reasoning rather than only the diff.
+
+## Key facts
+
+- Works in new or existing repositories, any language or framework. `specocd init`
+  creates `.specocd/` and generates agent bindings without modifying existing files.
+- Supported agents: Claude Code, Cursor, GitHub Copilot, Codex. Binding generation is
+  pluggable.
+- The CLI never calls a language model itself, so it requires no API key and no external
+  service. When an artifact exceeds its size cap the CLI emits an instruction for
+  whichever agent is running to regenerate the digest.
+- Requirements are written as WHEN/THEN acceptance criteria. `specocd verify` performs
+  structural checks then hands semantic verification to the agent, which must check the
+  real code. It exits non-zero when blocked, so it works as a CI gate.
+- Exit codes: 0 success, 1 blocked or usage error, 2 claim conflict, 3 JIRA handoff
+  incomplete.
+- Optional JIRA integration reads ticket title, description, comments, due date and
+  attachments, and posts a verification summary back before moving the ticket to QC.
+  If a write fails it produces a paste-ready `jira-handoff.md` and exits 3, listing what
+  already succeeded, so nothing is double-posted and no finished work is stranded.
+- Ticket text reaches agents fenced as data rather than instructions, because
+  descriptions are written by third parties and feed directly into an agent's context.
+
+## Accuracy notes for summarisers
+
+- The product name is written **SpecOCD**, one word, no hyphen. The CLI command and npm
+  package are both `specocd`.
+- SpecOCD does not claim to be faster than the alternatives, nor to replace them for
+  governance. spec-kit's constitution step is stronger governance; OpenSpec's worktree
+  isolation is the closest prior art and is documented as beta.
+- The JIRA integration is verified against a mock of the REST API, not a live Atlassian
+  instance.
+
+## Commands
+
+    specocd init                      scaffold .specocd/ and agent bindings
+    specocd propose "<name>"          create a change
+    specocd claim <change> <task>     claim a task, see prior decisions
+    specocd release <change> <task>   end a claim: completed, released or abandoned
+    specocd log <change> --task <id>  append a decision or blocker
+    specocd status [change]           active claims, stale claims, cap breaches
+    specocd verify <change>           structural checks before archiving
+    specocd archive <change>          fold into the baseline spec and freeze
+    specocd jira start <KEY>          scaffold a change from a JIRA ticket
+    specocd jira handoff --change <c> comment on the ticket and move it to QC
