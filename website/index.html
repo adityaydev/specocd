@@ -68,6 +68,17 @@
   "@context": "https://schema.org",
   "@graph": [
     {
+      "@type": "WebSite",
+      "@id": "https://specocd.in/#website",
+      "url": "https://specocd.in/",
+      "name": "SpecOCD",
+      "description": "A lightweight, tool-agnostic spec-driven development framework that coordinates multiple AI coding agents working the same change, using task claims, conflict detection and an append-only decision log.",
+      "inLanguage": "en",
+      "about": {
+        "@id": "https://specocd.in/#software"
+      }
+    },
+    {
       "@type": "SoftwareApplication",
       "name": "SpecOCD",
       "alternateName": "Specification-Obsessed Development",
@@ -79,17 +90,88 @@
       "license": "https://opensource.org/licenses/MIT",
       "description": "A lightweight, tool-agnostic spec-driven development framework that coordinates multiple AI coding agents working the same change, using task claims, conflict detection and an append-only decision log.",
       "featureList": [
-        "Task claims with conflict detection",
-        "Heartbeat-based recovery of stale claims",
-        "Append-only decision log replayed to the next agent",
-        "WHEN/THEN acceptance criteria and verification",
-        "Branch per change with feature/ and fix/ naming from the ticket type",
+        "Task claims with conflict detection across concurrent agents",
+        "Heartbeat-based recovery of claims held by a session that died",
+        "Append-only decision log replayed to the next agent on a task",
+        "WHEN/THEN acceptance criteria with structural and semantic verification",
+        "Single or multi branch mode, with feature/ and fix/ naming from the ticket type",
         "Human approval gate before any commit, push or merge",
-        "Push, pull request or merge, then ticket update, in that order",
+        "Push, then pull request or merge, then ticket update, in that order",
+        "Isolated git worktrees per task sharing one claim registry",
         "Bindings for Claude Code, Cursor, GitHub Copilot and Codex",
-        "JIRA ticket to QC workflow with manual fallback"
+        "JIRA ticket to QC workflow that degrades to a paste-ready file"
       ],
-      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "@id": "https://specocd.in/#software",
+      "downloadUrl": "https://www.npmjs.com/package/specocd",
+      "installUrl": "https://www.npmjs.com/package/specocd",
+      "codeRepository": "https://github.com/adityaydev/specocd",
+      "releaseNotes": "https://github.com/adityaydev/specocd/blob/main/CHANGELOG.md",
+      "datePublished": "2026-09-23",
+      "dateModified": "2026-09-24",
+      "sameAs": [
+        "https://www.npmjs.com/package/specocd",
+        "https://github.com/adityaydev/specocd"
+      ],
+      "author": {
+        "@type": "Person",
+        "name": "Aditya Yadav",
+        "url": "https://github.com/adityaydev"
+      }
+    },
+    {
+      "@type": "HowTo",
+      "name": "Set up SpecOCD in a project",
+      "description": "Install SpecOCD and create your first spec-driven change in an existing repository.",
+      "totalTime": "PT5M",
+      "tool": [
+        {
+          "@type": "HowToTool",
+          "name": "Node.js 20 or later"
+        }
+      ],
+      "step": [
+        {
+          "@type": "HowToStep",
+          "position": 1,
+          "name": "Install",
+          "text": "Run npm install -g specocd to install the command line tool globally."
+        },
+        {
+          "@type": "HowToStep",
+          "position": 2,
+          "name": "Initialise the project",
+          "text": "Run specocd init in a new or existing repository. It creates a .specocd directory, detects your AI coding agent and writes the matching bindings without modifying existing files. Pass --mode single or --mode multi to choose branching, and --integration pull-request or merge to choose how work lands."
+        },
+        {
+          "@type": "HowToStep",
+          "position": 3,
+          "name": "Propose a change",
+          "text": "Run specocd propose \"rate limiting\" to scaffold a change, then fill in the proposal, the WHEN/THEN acceptance criteria and the task list. Add --fix for a bug fix so the branch takes the fix prefix."
+        },
+        {
+          "@type": "HowToStep",
+          "position": 4,
+          "name": "Let agents work",
+          "text": "An agent runs specocd show to read the full context, specocd claim to take a task, and specocd log to record decisions. A second agent claiming a held task fails with exit code 2 rather than overwriting."
+        },
+        {
+          "@type": "HowToStep",
+          "position": 5,
+          "name": "Verify and approve",
+          "text": "Run specocd verify to check the change against its acceptance criteria. A developer then runs specocd approve, which re-runs verification and commits. Agents never approve their own work."
+        },
+        {
+          "@type": "HowToStep",
+          "position": 6,
+          "name": "Ship",
+          "text": "Run specocd ship to push the branch, open a pull request or merge, and update the linked JIRA ticket last."
+        }
+      ]
     },
     {
       "@type": "FAQPage",

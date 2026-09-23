@@ -6,6 +6,8 @@
 > agents can work the same change without overwriting each other.
 
 Site: https://specocd.in/
+Package: https://www.npmjs.com/package/specocd
+Source: https://github.com/adityaydev/specocd
 Version 1.0.1. MIT licensed. Node.js 20 or later. Installed with `npm install -g specocd`.
 
 ## What problem it solves
