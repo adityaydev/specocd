@@ -2,6 +2,13 @@
   "name": "specocd",
   "version": "1.0.0",
   "description": "Spec-driven development with multi-agent coordination: task claims, conflict detection and a shared decision log, so multiple AI coding agents can work the same change safely.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/adityaydev/specocd.git"
+  },
+  "bugs": {
+    "url": "https://github.com/adityaydev/specocd/issues"
+  },
   "type": "module",
   "bin": {
     "specocd": "dist/cli.js"
