@@ -49,6 +49,11 @@ specocd release add-user-auth T1 --status completed
   agent picks up *why* things were done, not just what.
 - **Resumable from disk alone** — claim + spec + event log + digest is the whole context.
   No dependency on a chat transcript, so any agent or session can pick up cold.
+  `specocd show <change>` prints that whole bundle in one read.
+
+Claims are mutated under a cross-process lock and written atomically, so concurrent
+agents cannot lose each other's claims. Logging refreshes your claim's heartbeat, so a
+long task does not go stale under the agent still working it.
 
 ## Context budget
 
@@ -77,6 +82,7 @@ itself — no API keys, no external service.
 | `specocd claim <change> <task-id>` | Claim a task (conflicts on a live claim) |
 | `specocd release <change> <task-id> [--status ...]` | End a claim: completed / released / abandoned |
 | `specocd log <change> [--task <id>] --type <t> --message <m>` | Append an event; `--show` reads the log |
+| `specocd show <change>` | Full context: spec, tasks, claims, decisions, what is free to claim |
 | `specocd status [change]` | Active claims, stale claims, cap breaches |
 | `specocd verify <change>` | Structural checks, then hands semantic verification to the agent |
 | `specocd archive <change> [--force]` | Fold into the baseline spec and freeze the change |
@@ -84,6 +90,7 @@ itself — no API keys, no external service.
 | `specocd bindings list` | Show available, detected and enabled agent bindings |
 | `specocd bindings sync [--all] [--only a,b]` | Regenerate binding files |
 | `specocd jira setup` | Create the gitignored credentials file |
+| `specocd jira doctor <key>` | Check credentials, access and the QC transition, read-only |
 | `specocd jira show <key>` | Fetch and print a ticket |
 | `specocd jira start <key>` | Scaffold a change from a ticket |
 | `specocd jira link <change> <key>` | Link an existing change to a ticket |

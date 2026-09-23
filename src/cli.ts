@@ -10,6 +10,7 @@ import { resolveIdentity } from "./core/session.js";
 import { archive } from "./commands/archive.js";
 import { listBindings, syncBindings } from "./commands/bindings.js";
 import {
+  doctor as jiraDoctor,
   handoff,
   linkChange,
   setup as jiraSetup,
@@ -19,6 +20,7 @@ import {
 import { CREDENTIALS_IGNORE_ENTRY } from "./credentials.js";
 import { renderTicket } from "./integrations/jira/format.js";
 import { init } from "./commands/init.js";
+import { renderContext, show } from "./commands/show.js";
 import { propose } from "./commands/propose.js";
 import { status } from "./commands/status.js";
 import { verify, verifyInstruction } from "./commands/verify.js";
@@ -219,6 +221,18 @@ program
   });
 
 program
+  .command("show")
+  .argument("<change>")
+  .option("--json", "machine-readable output")
+  .description("Print everything about a change: spec, tasks, claims and prior decisions")
+  .action((change: string, opts: { json?: boolean }) => {
+    const root = requireRoot();
+    requireChange(root, change);
+    const ctx = show(root, change);
+    console.log(opts.json ? JSON.stringify(ctx, null, 2) : renderContext(ctx));
+  });
+
+program
   .command("verify")
   .argument("<change>")
   .option("--json", "machine-readable output")
@@ -310,6 +324,24 @@ jira
         ? "Credentials look complete."
         : "Now fill in base_url, email and api_token.\nToken: https://id.atlassian.com/manage-profile/security/api-tokens",
     );
+  });
+
+jira
+  .command("doctor")
+  .argument("<key>", "any real ticket key to check against, e.g. PROJ-123")
+  .option("--to <stage>", "QC stage to check for (defaults to config jira.qc_transition)")
+  .description("Check credentials, connectivity and the QC transition before relying on them")
+  .action(async (key: string, opts: { to?: string }) => {
+    const checks = await jiraDoctor(requireRoot(), key, { qcStage: opts.to });
+    for (const check of checks) {
+      console.log(`${check.ok ? "ok  " : "FAIL"}  ${check.name.padEnd(24)} ${check.detail}`);
+    }
+    const failed = checks.filter((c) => !c.ok);
+    if (failed.length > 0) {
+      console.error(`\n${failed.length} check(s) failed.`);
+      process.exit(1);
+    }
+    console.log("\nAll checks passed.");
   });
 
 jira

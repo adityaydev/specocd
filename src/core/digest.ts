@@ -1,6 +1,7 @@
-import { existsSync, readdirSync, statSync, writeFileSync } from "node:fs";
+import { existsSync, readdirSync, statSync } from "node:fs";
 import path from "node:path";
 import { changeDir, changeFile } from "../paths.js";
+import { writeFileAtomic } from "./atomic.js";
 import { loadClaims } from "./claims.js";
 import { readEvents } from "./events.js";
 import { parseRequirements, parseTasks, readFrontMatter } from "./markdown.js";
@@ -97,6 +98,6 @@ export function generateDigest(root: string, change: string, now = new Date()): 
 
 export function writeDigest(root: string, change: string, now = new Date()): string {
   const contents = generateDigest(root, change, now);
-  writeFileSync(changeFile(root, change, "digest.md"), contents, "utf8");
+  writeFileAtomic(changeFile(root, change, "digest.md"), contents);
   return contents;
 }

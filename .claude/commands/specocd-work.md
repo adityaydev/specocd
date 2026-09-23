@@ -10,15 +10,17 @@ Specs live in `.specocd/`. A change is the atomic unit of work; each holds a pro
 requirement deltas (WHEN/THEN), tasks, a claim registry and an append-only event log.
 
 Before working a task in a change, ALWAYS:
-1. `specocd status <change>` — see who holds which task and what is stale.
-2. `specocd log <change> --task <id> --show` — read prior decisions so you do not redo
-   or contradict work another agent or session already did.
-3. `specocd claim <change> <task-id>` — claim before editing code. If it reports a
+1. `specocd show <change>` — the whole picture in one read: requirements, task states,
+   who holds what, prior decisions, open blockers, and which tasks are free to claim.
+   Start here so you do not redo or contradict work another agent already did.
+2. `specocd claim <change> <task-id>` — claim before editing code. If it reports a
    conflict, work a different task rather than the claimed one.
 
 While working, record non-obvious decisions:
 `specocd log <change> --task <id> --type decision --message "..."`
 Use `--type blocker` when you are stuck, so the next agent inherits the context.
+Logging also refreshes your claim, so log as you go on a long task: a claim that goes
+quiet past the staleness window can be taken over by another agent.
 
 When done: `specocd release <change> <task-id> --status completed`.
 If you stop early: `--status abandoned`, or `released` when handing off mid-task.

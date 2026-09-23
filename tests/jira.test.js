@@ -7,7 +7,7 @@ import test, { after, before, describe } from "node:test";
 import { JiraClient, JiraError } from "../dist/integrations/jira/client.js";
 import { UNTRUSTED_NOTICE, renderTicket, ticketSlug } from "../dist/integrations/jira/format.js";
 import { ensureGitignored, loadCredentials, requireJiraCredentials } from "../dist/credentials.js";
-import { findChangeForTicket, handoff, linkChange, setup, start } from "../dist/commands/jira.js";
+import { doctor, findChangeForTicket, handoff, linkChange, setup, start } from "../dist/commands/jira.js";
 import { init } from "../dist/commands/init.js";
 import { propose } from "../dist/commands/propose.js";
 import { readFrontMatter } from "../dist/core/markdown.js";
@@ -263,6 +263,54 @@ describe("jira start", () => {
     await start(root, "PROJ-42", fetchImpl);
     const second = await start(root, "PROJ-42", fetchImpl);
     assert.equal(second.existed, true);
+  });
+});
+
+describe("jira doctor", () => {
+  const failed = (checks) => checks.filter((c) => !c.ok);
+
+  test("passes when credentials, read access and the transition all work", async () => {
+    const root = tempProject();
+    const { fetchImpl } = mockJira();
+    const checks = await doctor(root, "PROJ-42", { qcStage: "Ready for QA", fetchImpl });
+    assert.deepEqual(failed(checks), [], JSON.stringify(checks, null, 2));
+  });
+
+  test("names the available transitions when the QC stage does not exist", async () => {
+    const root = tempProject();
+    const { fetchImpl } = mockJira();
+    const checks = await doctor(root, "PROJ-42", { qcStage: "Nowhere", fetchImpl });
+    const bad = failed(checks);
+    assert.equal(bad.length, 1);
+    assert.match(bad[0].detail, /Ready for QA/, "must list what is actually available");
+  });
+
+  test("stops at the read check when the ticket cannot be fetched", async () => {
+    const root = tempProject();
+    const { fetchImpl } = mockJira({ fail: ["get"] });
+    const checks = await doctor(root, "PROJ-42", { fetchImpl });
+    assert.equal(checks.at(-1).ok, false);
+    assert.match(checks.at(-1).name, /read PROJ-42/);
+  });
+
+  test("reports missing credentials without attempting a request", async () => {
+    const root = mkdtempSync(path.join(tmpdir(), "specocd-nocreds-"));
+    roots.push(root);
+    init(root);
+    let called = false;
+    const checks = await doctor(root, "PROJ-42", {
+      fetchImpl: async () => { called = true; return new Response("{}", { status: 200 }); },
+    });
+    assert.equal(checks.length, 1);
+    assert.equal(checks[0].ok, false);
+    assert.equal(called, false, "must not call JIRA without credentials");
+  });
+
+  test("never writes to the ticket", async () => {
+    const root = tempProject();
+    const { fetchImpl, calls } = mockJira();
+    await doctor(root, "PROJ-42", { qcStage: "Ready for QA", fetchImpl });
+    assert.deepEqual(calls.filter((c) => c.method === "POST"), [], "doctor must be read-only");
   });
 });
 

@@ -1,7 +1,8 @@
-import { existsSync, readFileSync, renameSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import YAML from "yaml";
 import { SCHEMA_VERSION } from "../config.js";
 import { changeFile } from "../paths.js";
+import { writeFileAtomic } from "./atomic.js";
 import { withLock } from "./lock.js";
 
 export type ClaimStatus = "active" | "released" | "completed" | "abandoned";
@@ -36,12 +37,8 @@ export function loadClaims(root: string, change: string): ClaimsFile {
   };
 }
 
-/** Writes via a temp file plus rename, so a reader never sees a half-written registry. */
 export function saveClaims(root: string, change: string, data: ClaimsFile): void {
-  const file = claimsPath(root, change);
-  const tmp = `${file}.${process.pid}.tmp`;
-  writeFileSync(tmp, YAML.stringify(data), "utf8");
-  renameSync(tmp, file);
+  writeFileAtomic(claimsPath(root, change), YAML.stringify(data));
 }
 
 function lockPath(root: string, change: string): string {

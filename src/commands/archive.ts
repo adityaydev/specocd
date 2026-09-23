@@ -1,6 +1,7 @@
 import { appendFileSync, existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { appendEvent } from "../core/events.js";
+import { withLock } from "../core/lock.js";
 import { updateFrontMatter, readFrontMatter } from "../core/markdown.js";
 import { resolveIdentity } from "../core/session.js";
 import { archiveDir, changeDir, changeFile, specsDir } from "../paths.js";
@@ -55,16 +56,22 @@ export function archive(root: string, change: string, opts: { force?: boolean } 
 
   const specFile = path.join(specsDir(root), `${feature}.md`);
   const blocks = extractRequirementBlocks(readFileSync(changeFile(root, change, "spec-delta.md"), "utf8"));
-  if (blocks !== "") {
-    if (!existsSync(specFile)) {
-      writeFileSync(specFile, `# ${feature}\n\nBaseline requirements. Folded in from changes on archive.\n`, "utf8");
-    }
-    appendFileSync(specFile, `\n<!-- from change: ${change}, archived ${now.toISOString()} -->\n\n${blocks}\n`, "utf8");
-  }
 
-  mkdirSync(archiveDir(root), { recursive: true });
-  const archivedTo = path.join(archiveDir(root), `${timestamp(now)}-${change}`);
-  renameSync(changeDir(root, change), archivedTo);
+  // Several changes can target one baseline spec, so the fold is serialised per
+  // feature; the rename joins it so a change cannot be archived twice.
+  const archivedTo = withLock(path.join(specsDir(root), `${feature}.lock`), function () {
+    if (blocks !== "") {
+      if (!existsSync(specFile)) {
+        writeFileSync(specFile, `# ${feature}\n\nBaseline requirements. Folded in from changes on archive.\n`, "utf8");
+      }
+      appendFileSync(specFile, `\n<!-- from change: ${change}, archived ${now.toISOString()} -->\n\n${blocks}\n`, "utf8");
+    }
+
+    mkdirSync(archiveDir(root), { recursive: true });
+    const target = path.join(archiveDir(root), `${timestamp(now)}-${change}`);
+    renameSync(changeDir(root, change), target);
+    return target;
+  });
 
   return {
     change,

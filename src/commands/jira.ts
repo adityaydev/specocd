@@ -7,6 +7,7 @@ import {
   assertCredentialsNotTracked,
   credentialsPath,
   ensureGitignored,
+  isTrackedByGit,
   loadCredentials,
   requireJiraCredentials,
 } from "../credentials.js";
@@ -55,6 +56,91 @@ export function setup(root: string): SetupResult {
 
 export async function show(root: string, key: string, fetchImpl?: FetchLike): Promise<JiraTicket> {
   return makeClient(root, fetchImpl).getTicket(key);
+}
+
+export interface DoctorCheck {
+  name: string;
+  ok: boolean;
+  detail: string;
+}
+
+/**
+ * Checks the JIRA setup end to end against a real ticket, so the first live run
+ * fails here with a readable diagnosis rather than midway through a handoff.
+ */
+export async function doctor(
+  root: string,
+  key: string,
+  opts: { qcStage?: string; fetchImpl?: FetchLike } = {},
+): Promise<DoctorCheck[]> {
+  const checks: DoctorCheck[] = [];
+  const config = loadConfig(root);
+  const qcStage = opts.qcStage ?? config.jira.qc_transition;
+
+  const creds = loadCredentials(root).jira;
+  checks.push({
+    name: "credentials",
+    ok: Boolean(creds && creds.api_token.trim() !== ""),
+    detail: creds
+      ? `${creds.email} at ${creds.base_url}`
+      : `missing — run \`specocd jira setup\` then fill in ${CREDENTIALS_IGNORE_ENTRY}`,
+  });
+  if (!checks[0].ok) return checks;
+
+  checks.push({
+    name: "token not in git",
+    ok: !isTrackedByGit(root),
+    detail: isTrackedByGit(root)
+      ? "TRACKED — revoke that token and untrack the file"
+      : "credentials file is not tracked",
+  });
+
+  const client = makeClient(root, opts.fetchImpl);
+
+  let ticket: JiraTicket;
+  try {
+    ticket = await client.getTicket(key);
+    checks.push({ name: `read ${key}`, ok: true, detail: `"${ticket.summary}" (${ticket.status})` });
+  } catch (error) {
+    checks.push({ name: `read ${key}`, ok: false, detail: (error as Error).message });
+    return checks;
+  }
+
+  checks.push({
+    name: "api version",
+    ok: true,
+    detail: `v${config.jira.api_version} (${config.jira.api_version >= 3 ? "ADF comment bodies" : "plain text, works on Cloud and Server"})`,
+  });
+
+  try {
+    const transitions = await client.getTransitions(key);
+    const wanted = qcStage.trim().toLowerCase();
+    const match = transitions.find(
+      (t) => t.name.toLowerCase() === wanted || t.to.toLowerCase() === wanted || t.id === qcStage,
+    );
+    checks.push({
+      name: `transition to "${qcStage}"`,
+      ok: Boolean(match),
+      detail: match
+        ? `available as "${match.name}" → ${match.to}`
+        : `NOT available from status "${ticket.status}". Options here: ` +
+          (transitions.map((t) => `"${t.name}" → ${t.to}`).join(", ") || "none") +
+          `. Set jira.qc_transition in .specocd/config.yaml.`,
+    });
+  } catch (error) {
+    checks.push({ name: `transition to "${qcStage}"`, ok: false, detail: (error as Error).message });
+  }
+
+  // Deliberately not posting a comment: a diagnostic must not leave marks on a
+  // real ticket. Comment permission surfaces on the first handoff, which falls
+  // back to a paste-ready file rather than losing work.
+  checks.push({
+    name: "comment permission",
+    ok: true,
+    detail: "not probed — doctor never writes to a ticket; a failure here degrades to jira-handoff.md",
+  });
+
+  return checks;
 }
 
 export interface StartResult {
