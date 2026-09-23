@@ -70,16 +70,53 @@ records provenance and can give each agent its own checkout.
 - **Repo state in context.** `specocd show` reports the current branch, HEAD and whether
   the tree is dirty, so an agent knows what it is standing on.
 
-SpecOCD never commits, pushes, merges or rebases on your behalf. It records what git
-already knows; the decisions stay yours.
+## Branching strategy
+
+Configured under `git:` in `.specocd/config.yaml`:
+
+```yaml
+git:
+  mode: multi                 # multi = branch per change, single = stay on current branch
+  branch_prefix: feature      # feature/rate-limiting
+  base_branch: main
+  remote: origin
+  integration: pull-request   # pull-request | merge | none
+  push: true
+  require_approval_to_commit: true
+```
+
+The full lifecycle:
 
 ```bash
-specocd claim rate-limiting T2
-specocd worktree add rate-limiting T2    # isolated checkout on its own branch
-# ... implement, commit ...
-specocd release rate-limiting T2 --status completed
-specocd worktree remove rate-limiting T2
+specocd propose "rate limiting"
+specocd branch rate-limiting             # multi mode: creates feature/rate-limiting
+specocd claim rate-limiting T1           # agent claims and implements
+specocd verify rate-limiting             # agent checks code against WHEN/THEN
+
+specocd approve rate-limiting            # DEVELOPER: verifies, then commits
+specocd ship rate-limiting               # push → PR or merge → update the ticket
 ```
+
+### Nothing ships without a human
+
+`approve` is the gate. An agent implements and verifies, then stops. A developer runs
+`approve`, which re-runs verification and only then commits, recording the sign-off on
+the proposal. `ship` refuses outright on a change that has not been approved, because
+pushing and merging affect everyone.
+
+Agents are instructed never to run `approve` or `ship` themselves.
+
+### Ship order, and what happens when it breaks
+
+`ship` pushes, then opens a pull request or merges, and updates the JIRA ticket **last** —
+so the ticket is never told work is ready that never left the machine. If a step fails,
+the ticket is not updated, a `ship-manual.md` is written listing what remains and what
+already succeeded, and the command exits `4`.
+
+Pull requests use the GitHub CLI when it is installed; without it, SpecOCD prints the
+compare URL to open one by hand rather than failing. Pushes never use `--force`.
+
+Use `specocd ship <change> --dry-run` to see the plan without touching anything.
 
 ## Context budget
 
@@ -111,6 +148,9 @@ itself — no API keys, no external service.
 | `specocd show <change>` | Full context: spec, tasks, claims, decisions, what is free to claim |
 | `specocd status [change]` | Active claims, stale claims, cap breaches |
 | `specocd verify <change>` | Structural checks, then hands semantic verification to the agent |
+| `specocd branch <change>` | Put the tree on the change's branch (multi mode) |
+| `specocd approve <change>` | Developer sign-off: verifies, then commits |
+| `specocd ship <change> [--dry-run]` | Push, open a PR or merge, then update the ticket |
 | `specocd archive <change> [--force]` | Fold into the baseline spec and freeze the change |
 | `specocd digest <change>` | Regenerate the structural digest |
 | `specocd worktree add <change> <task>` | Isolated git checkout on its own branch |
@@ -211,6 +251,7 @@ Server/Data Center work; set `jira.api_version: 3` in `config.yaml` for Cloud's 
 | `1` | Blockers present (verify), or a usage/state error |
 | `2` | Claim conflict — the task is already held by a live session |
 | `3` | JIRA handoff incomplete — a manual step is needed (see `jira-handoff.md`) |
+| `4` | Ship incomplete — a manual step is needed (see `ship-manual.md`) |
 
 ```yaml
 - run: specocd verify "$CHANGE" --json

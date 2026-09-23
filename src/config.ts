@@ -11,6 +11,28 @@ export interface JiraSettings {
   qc_transition: string;
 }
 
+export type BranchMode = "single" | "multi";
+export type Integration = "pull-request" | "merge" | "none";
+
+export interface GitSettings {
+  /** "multi" puts each change on its own branch; "single" works on the current one. */
+  mode: BranchMode;
+  /** Prefix for change branches in multi mode. */
+  branch_prefix: string;
+  /** Branch that finished work integrates into. */
+  base_branch: string;
+  remote: string;
+  /** What happens on ship: open a pull request, merge directly, or neither. */
+  integration: Integration;
+  /** Push the change branch when shipping. */
+  push: boolean;
+  /**
+   * Commit only after a human runs `specocd approve`. Turning this off would let an
+   * agent commit unreviewed work, so it stays on unless someone opts out knowingly.
+   */
+  require_approval_to_commit: boolean;
+}
+
 export interface SpecOCDConfig {
   schema_version: number;
   require_approval: boolean;
@@ -18,6 +40,7 @@ export interface SpecOCDConfig {
   stale_claim_minutes: number;
   enabled_bindings: string[];
   jira: JiraSettings;
+  git: GitSettings;
 }
 
 export const DEFAULT_CONFIG: SpecOCDConfig = {
@@ -30,11 +53,27 @@ export const DEFAULT_CONFIG: SpecOCDConfig = {
     api_version: 2,
     qc_transition: "QA",
   },
+  git: {
+    mode: "multi",
+    branch_prefix: "feature",
+    base_branch: "main",
+    remote: "origin",
+    // A pull request is reviewable and revertible; merging straight to the base
+    // branch is not, so that stays opt-in.
+    integration: "pull-request",
+    push: true,
+    require_approval_to_commit: true,
+  },
 };
 
 export function loadConfig(root: string): SpecOCDConfig {
   const raw = YAML.parse(readFileSync(configPath(root), "utf8")) ?? {};
-  return { ...DEFAULT_CONFIG, ...raw, jira: { ...DEFAULT_CONFIG.jira, ...(raw.jira ?? {}) } };
+  return {
+    ...DEFAULT_CONFIG,
+    ...raw,
+    jira: { ...DEFAULT_CONFIG.jira, ...(raw.jira ?? {}) },
+    git: { ...DEFAULT_CONFIG.git, ...(raw.git ?? {}) },
+  };
 }
 
 export function saveConfig(root: string, config: SpecOCDConfig): void {

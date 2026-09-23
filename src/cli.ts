@@ -8,7 +8,9 @@ import { digestInstruction, findOversized, writeDigest } from "./core/digest.js"
 import { appendEvent, readEvents, type EventType } from "./core/events.js";
 import { changedFiles, repoState, shortSha } from "./core/git.js";
 import { resolveIdentity } from "./core/session.js";
+import { approve } from "./commands/approve.js";
 import { archive } from "./commands/archive.js";
+import { useBranch } from "./commands/branch.js";
 import { listBindings, syncBindings } from "./commands/bindings.js";
 import {
   doctor as jiraDoctor,
@@ -22,6 +24,7 @@ import { CREDENTIALS_IGNORE_ENTRY } from "./credentials.js";
 import { renderTicket } from "./integrations/jira/format.js";
 import { init } from "./commands/init.js";
 import { renderContext, show } from "./commands/show.js";
+import { ship } from "./commands/ship.js";
 import { propose } from "./commands/propose.js";
 import { listChanges, status } from "./commands/status.js";
 import { createWorktree, dropWorktree, listTaskWorktrees } from "./commands/worktree.js";
@@ -308,6 +311,77 @@ worktree
     const root = requireRoot();
     const dir = dropWorktree(root, change, taskId, opts.force);
     console.log(`Removed worktree ${dir}`);
+  });
+
+program
+  .command("branch")
+  .argument("<change>")
+  .description("Put the working tree on this change's branch (multi mode) ")
+  .action((change: string) => {
+    const root = requireRoot();
+    requireChange(root, change);
+    const result = useBranch(root, change);
+    if (result.mode === "single") {
+      console.log(`Single-branch mode: staying on ${result.branch}.`);
+      return;
+    }
+    console.log(
+      result.created
+        ? `Created and switched to ${result.branch}.`
+        : result.switched
+          ? `Switched to ${result.branch}.`
+          : `Already on ${result.branch}.`,
+    );
+  });
+
+program
+  .command("approve")
+  .argument("<change>")
+  .option("--force", "approve despite verification blockers")
+  .option("--message <text>", "override the commit message")
+  .description("Developer sign-off: verifies, then commits the work")
+  .action((change: string, opts: { force?: boolean; message?: string }) => {
+    const root = requireRoot();
+    requireChange(root, change);
+    const result = approve(root, change, opts);
+
+    if (result.committed) {
+      console.log(`Approved and committed ${shortSha(result.sha)} on ${result.branch}.`);
+      console.log(`\n${result.message.split("\n")[0]}`);
+    } else if (result.nothingToCommit) {
+      console.log(`Approved. Nothing to commit — the working tree is already clean.`);
+    } else {
+      console.log("Approved.");
+    }
+    console.log(`\nShip it with: specocd ship ${change}`);
+  });
+
+program
+  .command("ship")
+  .argument("<change>")
+  .option("--dry-run", "show what would happen without touching anything")
+  .option("--skip-jira", "do not update the linked ticket")
+  .option("--force", "proceed despite blockers (still requires approval)")
+  .description("Push, open a pull request or merge, then update the ticket")
+  .action(async (change: string, opts: { dryRun?: boolean; skipJira?: boolean; force?: boolean }) => {
+    const root = requireRoot();
+    requireChange(root, change);
+    const result = await ship(root, change, opts);
+
+    for (const step of result.steps) {
+      console.log(`${step.ok ? "ok  " : "FAIL"}  ${step.name.padEnd(14)} ${step.detail}`);
+    }
+    if (result.steps.length === 0) {
+      console.log(`Nothing to ship for "${change}": git integration is switched off in config.yaml.`);
+    }
+    if (result.prUrl) console.log(`\n${result.prUrl}`);
+
+    const failed = result.steps.filter((s) => !s.ok);
+    if (failed.length > 0) {
+      console.error(`\n${failed.length} step(s) did not complete.`);
+      if (result.manualPath) console.error(`Wrote ${path.relative(root, result.manualPath)} with what remains.`);
+      process.exit(4);
+    }
   });
 
 program

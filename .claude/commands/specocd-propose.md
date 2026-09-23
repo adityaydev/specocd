@@ -47,7 +47,17 @@ an isolated checkout rather than sharing one working tree:
 `specocd worktree add <change> <task-id>` prints a path to cd into, on its own branch.
 Clean it up with `specocd worktree remove <change> <task-id>` once the work is merged.
 
-SpecOCD never commits, pushes or merges on your behalf. Those stay the developer's call.
+## Committing and shipping
+
+You do NOT commit, push, merge or open pull requests yourself, and you never run
+`specocd approve` or `specocd ship`. Both are the developer's decision.
+
+The sequence is: you implement, then `specocd verify <change>` and check each WHEN/THEN
+against the real code, then you report what you did and STOP. The developer runs
+`specocd approve <change>`, which commits. Shipping (push, pull request or merge, then
+the ticket update) follows from that approval.
+
+If you believe a change is ready, say so and name the command. Do not run it.
 
 NEVER write credentials, tokens or PII into events, specs or digests — these are committed
 to git history.

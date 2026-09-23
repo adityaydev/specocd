@@ -109,6 +109,96 @@ export function listWorktrees(root: string): Worktree[] {
 
 export class GitError extends Error {}
 
+/** Runs git and raises with git's own stderr, which says far more than a generic failure. */
+function gitOrThrow(root: string, args: string[], what: string): string {
+  try {
+    return execFileSync("git", args, { cwd: root, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }).trim();
+  } catch (error) {
+    const err = error as { stderr?: string | Buffer; message: string };
+    const detail = err.stderr ? String(err.stderr).trim() : err.message;
+    throw new GitError(`${what}\n${detail}`);
+  }
+}
+
+export function checkout(root: string, branch: string, create = false): void {
+  const args = create ? ["checkout", "-b", branch] : ["checkout", branch];
+  gitOrThrow(root, args, `Could not check out ${branch}.`);
+}
+
+export function stageAll(root: string): void {
+  gitOrThrow(root, ["add", "-A"], "Could not stage changes.");
+}
+
+export function hasChanges(root: string): boolean {
+  return isDirty(root);
+}
+
+export function commit(root: string, message: string): string {
+  gitOrThrow(root, ["commit", "-m", message], "Could not create the commit.");
+  return headSha(root) ?? "";
+}
+
+export function push(root: string, remote: string, branch: string): void {
+  // Never force: a force push can destroy work that is not ours.
+  gitOrThrow(root, ["push", "--set-upstream", remote, branch], `Could not push ${branch} to ${remote}.`);
+}
+
+export function hasRemote(root: string, remote: string): boolean {
+  const out = git(root, ["remote"]);
+  return out !== null && out.split("\n").includes(remote);
+}
+
+export function remoteUrl(root: string, remote: string): string | null {
+  return git(root, ["remote", "get-url", remote]);
+}
+
+export function mergeBranch(root: string, branch: string, into: string): void {
+  checkout(root, into);
+  gitOrThrow(root, ["merge", "--no-ff", branch], `Could not merge ${branch} into ${into}.`);
+}
+
+/** Converts an ssh or https remote into a browsable https base, or null if unrecognised. */
+export function webBaseUrl(root: string, remote: string): string | null {
+  const url = remoteUrl(root, remote);
+  if (!url) return null;
+  const ssh = url.match(/^git@([^:]+):(.+?)(?:\.git)?$/);
+  if (ssh) return `https://${ssh[1]}/${ssh[2]}`;
+  const https = url.match(/^https?:\/\/(?:[^@]+@)?(.+?)(?:\.git)?$/);
+  if (https) return `https://${https[1]}`;
+  return null;
+}
+
+export function compareUrl(root: string, remote: string, base: string, branch: string): string | null {
+  const web = webBaseUrl(root, remote);
+  return web ? `${web}/compare/${base}...${branch}?expand=1` : null;
+}
+
+export function hasGhCli(): boolean {
+  try {
+    execFileSync("gh", ["--version"], { stdio: "ignore" });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** Opens a pull request through the GitHub CLI. Returns its URL. */
+export function createPullRequest(
+  root: string,
+  opts: { base: string; head: string; title: string; body: string },
+): string {
+  try {
+    return execFileSync(
+      "gh",
+      ["pr", "create", "--base", opts.base, "--head", opts.head, "--title", opts.title, "--body", opts.body],
+      { cwd: root, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] },
+    ).trim();
+  } catch (error) {
+    const err = error as { stderr?: string | Buffer; message: string };
+    throw new GitError(`Could not create the pull request.\n${err.stderr ? String(err.stderr).trim() : err.message}`);
+  }
+}
+
 /**
  * Creates an isolated checkout so two agents can build different tasks of the same
  * change at once without fighting over one working tree.
