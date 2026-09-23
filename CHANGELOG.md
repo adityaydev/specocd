@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.1
+
+- `specocd show` no longer renders `detached at null` in a repository with no
+  commits yet. An unborn HEAD has neither a branch nor a sha, which is a plausible
+  first run: `git init`, `specocd init`, `propose`, `show`.
+- Fixed the test script, which relied on a recursive glob that zsh expands and `sh`
+  does not, so every CI job failed before running a test.
+
 ## 1.0.0
 
 First release.

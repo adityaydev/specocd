@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { Command } from "commander";
 import { loadConfig } from "./config.js";
@@ -33,7 +33,15 @@ import { verify, verifyInstruction } from "./commands/verify.js";
 import { changeDir, requireRoot } from "./paths.js";
 
 const program = new Command();
-program.name("specocd").description("Spec-driven development with multi-agent context coordination").version("1.0.0");
+// Read from the manifest rather than repeating it here, where it would drift.
+const { version } = JSON.parse(
+  readFileSync(new URL("../package.json", import.meta.url), "utf8"),
+) as { version: string };
+
+program
+  .name("specocd")
+  .description("Spec-driven development with multi-agent context coordination")
+  .version(version);
 
 function requireChange(root: string, change: string): void {
   if (!existsSync(changeDir(root, change))) {

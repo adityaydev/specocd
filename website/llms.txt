@@ -6,7 +6,7 @@
 > agents can work the same change without overwriting each other.
 
 Site: https://specocd.in/
-Version 1.0.0. MIT licensed. Node.js 20 or later. Installed with `npm install -g specocd`.
+Version 1.0.1. MIT licensed. Node.js 20 or later. Installed with `npm install -g specocd`.
 
 ## What problem it solves
 

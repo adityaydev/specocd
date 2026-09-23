@@ -323,7 +323,7 @@ adoption requirement, demonstrated rather than asserted.
 
 ## Status
 
-**v1.0.0** — 146 tests covering the coordination core, the full
+**v1.0.1** — 147 tests covering the coordination core, the full
 propose → claim → verify → approve → ship lifecycle, git branching and worktrees, the
 JIRA integration, and the CLI exit-code contract. SpecOCD manages its own development,
 so the coordination layer is exercised daily.
