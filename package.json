@@ -14,7 +14,7 @@
     "specocd": "dist/cli.js"
   },
   "files": [
-    "dist",
+    "dist/**/*.js",
     "CHANGELOG.md"
   ],
   "engines": {

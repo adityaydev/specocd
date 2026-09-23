@@ -7,6 +7,10 @@
   first run: `git init`, `specocd init`, `propose`, `show`.
 - Fixed the test script, which relied on a recursive glob that zsh expands and `sh`
   does not, so every CI job failed before running a test.
+- `specocd --version` reads the version from the manifest rather than a hardcoded
+  copy, which had already drifted a release behind.
+- Source maps are no longer published. They were half the package and are of no
+  use to anyone installing the CLI: 46 KB packed, down from 68 KB.
 
 ## 1.0.0
 
