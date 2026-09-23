@@ -40,6 +40,10 @@ SpecOCD adds three things:
   stop. `specocd approve` re-runs verification and only then commits. `specocd ship`
   refuses on any change that has not been approved. Agents are instructed never to run
   either command.
+- **One integration mode per project.** Either `pull-request` (the default, reviewable
+  and revertible) or `merge`. Chosen with `specocd init --integration`, changed with
+  `specocd config set git.integration`. In merge mode the base branch is pushed as well,
+  because a merge that stays on the developer's machine has shipped nothing.
 - **Ship order.** Push, then pull request or merge, then the ticket — last, so a ticket
   is never told work is ready that never left the machine. A failure leaves the ticket
   untouched, writes `ship-manual.md` with what remains and what already succeeded, and

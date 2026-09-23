@@ -143,6 +143,14 @@
         },
         {
           "@type": "Question",
+          "name": "Can SpecOCD merge straight to main instead of opening a pull request?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. A project is in one integration mode or the other, chosen with specocd init --integration pull-request or --integration merge and changeable later with specocd config set git.integration. Pull request is the default because it is reviewable and revertible. In merge mode SpecOCD merges the change branch into the base branch and pushes the base branch as well, since a merge that stays on the developer's machine has not shipped anything."
+          }
+        },
+        {
+          "@type": "Question",
           "name": "What order does SpecOCD push, merge and update the ticket in?",
           "acceptedAnswer": {
             "@type": "Answer",
@@ -466,11 +474,8 @@ Approved and committed a3f91c2 on fix/PROJ-42-login-timeout.
             <h3>Branch per change, or stay put</h3>
             <p>
               <code style="background: none; padding: 0">specocd init --mode single</code> keeps you
-              on your current branch; multi gives each change its own. A project is also in one
-              integration mode or the other:
-              <code style="background: none; padding: 0">--integration pull-request</code> or
-              <code style="background: none; padding: 0">merge</code>, which merges into the base
-              branch and pushes it.
+              on your current branch; multi gives each change its own. Switch any time with
+              <code style="background: none; padding: 0">specocd config set git.mode</code>.
             </p>
           </div>
           <div class="step">
@@ -491,6 +496,53 @@ Approved and committed a3f91c2 on fix/PROJ-42-login-timeout.
             </p>
           </div>
         </div>
+      </div>
+
+      <div style="margin-top: 64px">
+        <div class="section-head" style="margin-bottom: 28px">
+          <h3 style="font-size: 1.375rem; letter-spacing: -0.02em">One integration mode or the other.</h3>
+          <p class="lead" style="font-size: 1rem">
+            A project either opens pull requests or merges straight to the base branch. Chosen at
+            init, and the same for every change, so nobody has to wonder which happened.
+          </p>
+        </div>
+
+        <div class="split">
+          <div class="terminal">
+            <div class="terminal-bar">
+              <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+              <span class="terminal-title">integration: pull-request &nbsp;(default)</span>
+            </div>
+            <div class="terminal-body">
+<pre><span class="c-green">ok</span>  push           branch → origin
+<span class="c-green">ok</span>  pull request   .../pull/418
+<span class="c-green">ok</span>  jira           moved to QA
+
+<span class="c-dim">Reviewable before it lands, and</span>
+<span class="c-dim">revertible after.</span></pre>
+            </div>
+          </div>
+
+          <div class="terminal">
+            <div class="terminal-bar">
+              <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+              <span class="terminal-title">integration: merge</span>
+            </div>
+            <div class="terminal-body">
+<pre><span class="c-green">ok</span>  push           branch → origin
+<span class="c-green">ok</span>  merge          branch → main
+<span class="c-green">ok</span>  push base      main → origin
+<span class="c-green">ok</span>  jira           moved to QA
+
+<span class="c-dim">The base branch is pushed too: a</span>
+<span class="c-dim">local merge has shipped nothing.</span></pre>
+            </div>
+          </div>
+        </div>
+        <p class="caption" style="margin-top: 18px">
+          Either way, a failed step stops the ticket update and records what remains. Pushes never
+          use <code>--force</code>, and SpecOCD never rebases.
+        </p>
       </div>
     </div>
   </section>
@@ -735,6 +787,16 @@ Approved and committed a3f91c2 on fix/PROJ-42-login-timeout.
             runs <code>specocd approve</code>, which re-runs verification first.
             <code>specocd ship</code> refuses outright on a change nobody approved, and the
             generated agent instructions tell agents never to run either command.
+          </p>
+        </div>
+        <div class="qa">
+          <h3>Can it merge straight to main instead of opening a PR?</h3>
+          <p>
+            Yes. A project is in one mode or the other:
+            <code>specocd init --integration pull-request</code> or <code>merge</code>, changeable
+            later with <code>specocd config set git.integration</code>. Pull request is the default
+            because it is reviewable and revertible. Merge mode pushes the base branch too, since a
+            merge that stays on your machine has shipped nothing.
           </p>
         </div>
         <div class="qa">
