@@ -22,7 +22,11 @@ export interface ProposeResult {
   files: string[];
 }
 
-export function propose(root: string, name: string, opts: { design?: boolean } = {}): ProposeResult {
+export function propose(
+  root: string,
+  name: string,
+  opts: { design?: boolean; type?: "feature" | "fix" } = {},
+): ProposeResult {
   const change = slugify(name);
   if (!change) throw new Error(`"${name}" does not produce a usable change slug.`);
 
@@ -32,7 +36,7 @@ export function propose(root: string, name: string, opts: { design?: boolean } =
 
   const createdAt = new Date().toISOString();
   const files: Array<[string, string]> = [
-    ["proposal.md", proposalTemplate(change, createdAt)],
+    ["proposal.md", proposalTemplate(change, createdAt, opts.type ?? "feature")],
     ["spec-delta.md", specDeltaTemplate(change)],
     ["tasks.md", tasksTemplate(change)],
     ["digest.md", digestTemplate(change)],

@@ -64,9 +64,10 @@ records provenance and can give each agent its own checkout.
   again. `specocd show` then displays the range that implemented each task, and `release`
   reports how many files changed.
 - **Isolated worktrees.** `specocd worktree add <change> <task>` creates a checkout beside
-  the repo on branch `specocd/<change>/<task>`, so two agents can build different tasks of
-  one change without sharing a working tree. `specocd worktree list` shows each one and
-  the claim that owns it; `remove` cleans up.
+  the repo on its own branch, so two agents can build different tasks of one change
+  without sharing a working tree. `specocd worktree list` shows each one and the claim
+  that owns it; `remove` cleans up. Commands run inside a worktree use the main
+  checkout's coordination state, so every agent sees one claim registry.
 - **Repo state in context.** `specocd show` reports the current branch, HEAD and whether
   the tree is dirty, so an agent knows what it is standing on.
 
@@ -77,7 +78,9 @@ Configured under `git:` in `.specocd/config.yaml`:
 ```yaml
 git:
   mode: multi                 # multi = branch per change, single = stay on current branch
-  branch_prefix: feature      # feature/rate-limiting
+  branch_prefix:
+    feature: feature          # feature/PROJ-42-login-timeout
+    fix: fix                  # fix/PROJ-51-session-leak
   base_branch: main
   remote: origin
   integration: pull-request   # pull-request | merge | none
@@ -96,6 +99,29 @@ specocd verify rate-limiting             # agent checks code against WHEN/THEN
 specocd approve rate-limiting            # DEVELOPER: verifies, then commits
 specocd ship rate-limiting               # push → PR or merge → update the ticket
 ```
+
+### Branch naming
+
+| Kind | Pattern | Example |
+|---|---|---|
+| Feature | `feature/{TICKET-ID}-{kebab-desc}` | `feature/PROJ-42-login-timeout` |
+| Bug fix | `fix/{TICKET-ID}-{kebab-desc}` | `fix/PROJ-51-session-leak` |
+| No ticket | prefix + description | `feature/rate-limiting` |
+| Task worktree | change branch + `-{task}` | `fix/PROJ-51-session-leak-t1` |
+
+The kind comes from the proposal's `type:` field. `specocd jira start` sets it from the
+JIRA issue type (Bug, Defect, Hotfix and similar become `fix`); otherwise pass
+`specocd propose "..." --fix`.
+
+Ticket keys stay **upper case** in the branch, because Atlassian's git integration and
+most CI rules match the uppercase key to link a branch back to its ticket.
+
+Task branches append `-{task}` rather than nesting under the change branch: git refs are
+paths, so `feature/x` and `feature/x/t1` cannot both exist. `git branch --list
+'feature/PROJ-42*'` still shows the change and all its tasks together.
+
+Names are trimmed on a word boundary at 40 characters, so a long ticket summary does not
+produce an unreadable branch.
 
 ### Nothing ships without a human
 
@@ -141,7 +167,7 @@ itself — no API keys, no external service.
 | Command | Purpose |
 |---|---|
 | `specocd init` | Scaffold `.specocd/`, detect agent tooling, generate bindings |
-| `specocd propose <name> [--design]` | Create a change |
+| `specocd propose <name> [--design] [--fix]` | Create a change; `--fix` makes it a bug fix |
 | `specocd claim <change> <task-id>` | Claim a task (conflicts on a live claim) |
 | `specocd release <change> <task-id> [--status ...]` | End a claim: completed / released / abandoned |
 | `specocd log <change> [--task <id>] --type <t> --message <m>` | Append an event; `--show` reads the log |

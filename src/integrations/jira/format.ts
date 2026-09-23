@@ -78,11 +78,19 @@ export function ticketSlug(ticket: JiraTicket): string {
   return words ? `${key}-${words}` : key;
 }
 
+/** JIRA issue types that mean "this is a defect", so the branch gets the fix prefix. */
+const BUG_ISSUE_TYPES = ["bug", "defect", "bugfix", "hotfix", "incident", "problem"];
+
+export function ticketChangeType(ticket: JiraTicket): "feature" | "fix" {
+  return BUG_ISSUE_TYPES.includes(ticket.issueType.trim().toLowerCase()) ? "fix" : "feature";
+}
+
 export function proposalFromTicket(ticket: JiraTicket, change: string, createdAt: string): string {
   return `---
 schema_version: 1
 change: ${change}
 feature: ${ticket.key.toLowerCase()}
+type: ${ticketChangeType(ticket)}
 jira: ${ticket.key}
 status: draft
 approved: false

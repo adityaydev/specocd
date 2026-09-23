@@ -13,12 +13,14 @@ export interface JiraSettings {
 
 export type BranchMode = "single" | "multi";
 export type Integration = "pull-request" | "merge" | "none";
+/** What the change is: decides the branch prefix. */
+export type ChangeType = "feature" | "fix";
 
 export interface GitSettings {
   /** "multi" puts each change on its own branch; "single" works on the current one. */
   mode: BranchMode;
-  /** Prefix for change branches in multi mode. */
-  branch_prefix: string;
+  /** Branch prefix per kind of work: feature/PROJ-42-… or fix/PROJ-51-… */
+  branch_prefix: Record<ChangeType, string>;
   /** Branch that finished work integrates into. */
   base_branch: string;
   remote: string;
@@ -55,7 +57,7 @@ export const DEFAULT_CONFIG: SpecOCDConfig = {
   },
   git: {
     mode: "multi",
-    branch_prefix: "feature",
+    branch_prefix: { feature: "feature", fix: "fix" },
     base_branch: "main",
     remote: "origin",
     // A pull request is reviewable and revertible; merging straight to the base
@@ -72,7 +74,16 @@ export function loadConfig(root: string): SpecOCDConfig {
     ...DEFAULT_CONFIG,
     ...raw,
     jira: { ...DEFAULT_CONFIG.jira, ...(raw.jira ?? {}) },
-    git: { ...DEFAULT_CONFIG.git, ...(raw.git ?? {}) },
+    git: {
+      ...DEFAULT_CONFIG.git,
+      ...(raw.git ?? {}),
+      // A bare string is accepted and applied to both kinds, so an older config
+      // (or someone who wants one prefix everywhere) keeps working.
+      branch_prefix:
+        typeof raw.git?.branch_prefix === "string"
+          ? { feature: raw.git.branch_prefix, fix: raw.git.branch_prefix }
+          : { ...DEFAULT_CONFIG.git.branch_prefix, ...(raw.git?.branch_prefix ?? {}) },
+    },
   };
 }
 

@@ -80,11 +80,6 @@ export function branchExists(root: string, branch: string): boolean {
   return git(root, ["rev-parse", "--verify", "--quiet", `refs/heads/${branch}`]) !== null;
 }
 
-/** Branch name for a task's isolated worktree. Namespaced so it is obvious who made it. */
-export function taskBranch(change: string, taskId: string): string {
-  return `specocd/${change}/${taskId.toLowerCase()}`;
-}
-
 export interface Worktree {
   path: string;
   branch: string | null;

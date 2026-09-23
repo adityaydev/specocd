@@ -1,15 +1,17 @@
 import { SCHEMA_VERSION } from "../config.js";
 
-export function proposalTemplate(change: string, createdAt: string): string {
+export function proposalTemplate(change: string, createdAt: string, type: "feature" | "fix" = "feature"): string {
   return `---
 schema_version: ${SCHEMA_VERSION}
 change: ${change}
 feature: ${change}
+type: ${type}
 status: draft
 approved: false
 created_at: ${createdAt}
 ---
 
+<!-- type: feature or fix. Decides the branch prefix: feature/… or fix/… -->
 <!-- feature: which baseline spec in .specocd/specs/ this folds into on archive. -->
 <!-- Point several changes at the same feature to grow one baseline spec. -->
 

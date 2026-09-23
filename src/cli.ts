@@ -65,10 +65,11 @@ program
   .command("propose")
   .argument("<name>", "change name (slugified)")
   .option("--design", "also scaffold design.md")
+  .option("--fix", "a bug fix rather than a feature (branch prefix fix/)")
   .description("Create a new change")
-  .action((name: string, opts: { design?: boolean }) => {
+  .action((name: string, opts: { design?: boolean; fix?: boolean }) => {
     const root = requireRoot();
-    const result = propose(root, name, opts);
+    const result = propose(root, name, { design: opts.design, type: opts.fix ? "fix" : "feature" });
     console.log(`Created change "${result.change}" at ${path.relative(root, result.dir)}/`);
     console.log(`  ${result.files.join("\n  ")}`);
   });

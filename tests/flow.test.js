@@ -83,9 +83,30 @@ describe("branching", () => {
     assert.equal(useBranch(root, change).created, false, "must not recreate an existing branch");
   });
 
-  test("honours a custom prefix", () => {
-    const config = { ...loadConfig(project()).git, branch_prefix: "chore" };
-    assert.equal(changeBranch({ git: config }, "cleanup"), "chore/cleanup");
+  test("bug fixes take the fix prefix, features take feature", () => {
+    const git = loadConfig(project()).git;
+    assert.equal(changeBranch({ git }, "rate-limiting", { type: "feature" }), "feature/rate-limiting");
+    assert.equal(changeBranch({ git }, "null-crash", { type: "fix" }), "fix/null-crash");
+  });
+
+  test("a JIRA key keeps its upper case, so the ticket auto-links", () => {
+    const git = loadConfig(project()).git;
+    assert.equal(
+      changeBranch({ git }, "proj-42-login-timeout", { ticket: "PROJ-42", type: "fix" }),
+      "fix/PROJ-42-login-timeout",
+    );
+    // The key is prepended when the slug does not already carry it.
+    assert.equal(
+      changeBranch({ git }, "login-timeout", { ticket: "PROJ-42", type: "feature" }),
+      "feature/PROJ-42-login-timeout",
+    );
+  });
+
+  test("long branch names are trimmed on a word boundary", () => {
+    const git = loadConfig(project()).git;
+    const branch = changeBranch({ git }, "a-really-quite-extraordinarily-long-change-name-that-runs-on", {});
+    assert.ok(branch.length <= 48, branch);
+    assert.ok(!branch.endsWith("-"), "must not end mid-word");
   });
 });
 

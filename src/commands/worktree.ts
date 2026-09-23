@@ -1,14 +1,9 @@
 import { existsSync, realpathSync } from "node:fs";
 import path from "node:path";
 import { loadClaims, updateClaims, type Claim } from "../core/claims.js";
-import {
-  addWorktree,
-  isRepo,
-  listWorktrees,
-  removeWorktree,
-  taskBranch,
-  type Worktree,
-} from "../core/git.js";
+import { addWorktree, isRepo, listWorktrees, removeWorktree, type Worktree } from "../core/git.js";
+import { changeTicket, changeType, taskBranch } from "./branch.js";
+import { loadConfig } from "../config.js";
 import { changeDir } from "../paths.js";
 
 export class NotARepoError extends Error {
@@ -54,7 +49,10 @@ export function createWorktree(root: string, change: string, taskId: string): Wo
   if (!isRepo(root)) throw new NotARepoError();
   if (!existsSync(changeDir(root, change))) throw new Error(`No such change: "${change}".`);
 
-  const branch = taskBranch(change, taskId);
+  const branch = taskBranch(loadConfig(root), change, taskId, {
+    ticket: changeTicket(root, change),
+    type: changeType(root, change),
+  });
   const dir = worktreePath(root, change, taskId);
 
   const existing = listWorktrees(root).find((w) => samePath(w.path, dir));
@@ -107,7 +105,7 @@ export function listTaskWorktrees(root: string, changes: string[]): WorktreeList
   };
 
   return listWorktrees(root)
-    .filter((w) => w.branch?.startsWith("specocd/") || ownerFor(w.path) !== undefined)
+    .filter((w) => ownerFor(w.path) !== undefined)
     .map(function (w) {
       const owner = ownerFor(w.path);
       return { ...w, claim: owner?.claim ?? null, change: owner?.change ?? null };

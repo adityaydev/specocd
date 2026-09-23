@@ -14,7 +14,6 @@ import {
   isRepo,
   repoState,
   shortSha,
-  taskBranch,
 } from "../dist/core/git.js";
 import { appendEvent, readEvents } from "../dist/core/events.js";
 import { findRoot } from "../dist/paths.js";
@@ -96,10 +95,6 @@ describe("git helpers", () => {
     assert.deepEqual(changedFiles(root, before, after), ["mw.js"]);
   });
 
-  test("namespaces task branches so their origin is obvious", () => {
-    assert.equal(taskBranch("rate-limiting", "T2"), "specocd/rate-limiting/t2");
-  });
-
   test("shortSha tolerates a missing sha", () => {
     assert.equal(shortSha(null), null);
     assert.equal(shortSha("0123456789abcdef"), "0123456");
@@ -148,11 +143,11 @@ describe("worktrees", () => {
 
     const result = createWorktree(root, change, "T2");
     assert.equal(result.existed, false);
-    assert.equal(result.branch, "specocd/rate-limiting/t2");
+    assert.equal(result.branch, "feature/rate-limiting-t2");
     assert.ok(existsSync(result.path));
     assert.equal(
       execFileSync("git", ["rev-parse", "--abbrev-ref", "HEAD"], { cwd: result.path, encoding: "utf8" }).trim(),
-      "specocd/rate-limiting/t2",
+      "feature/rate-limiting-t2",
       "the worktree must be on its own branch, not the main one",
     );
   });

@@ -9,7 +9,9 @@ jira:
   qc_transition: QA
 git:
   mode: multi
-  branch_prefix: feature
+  branch_prefix:
+    feature: feature
+    fix: feature
   base_branch: main
   remote: origin
   integration: pull-request
